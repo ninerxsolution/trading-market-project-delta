@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  email     String   @unique
+  avatar    String
+  joinDate  String
+  bio       String
+  password  String?  // For mock login, optional
+  role      Role     @default(USER)
+  tradePosts TradePost[]
+  saleListings SaleListing[]
+  sessions  Session[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  image        String
+  description String
+  rarity      String   // Common, Uncommon, Rare, Epic, Legendary
+  averagePrice Int
+  npcBuyPrice  Int?
+  npcSellPrice Int?
+  availability NpcAvailability @default(NOT_AVAILABLE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  prices      ItemPrice[]
+  saleListings SaleListing[]
+}
+
+enum NpcAvailability {
+  BUYABLE
+  TRADE_ONLY
+  NOT_AVAILABLE
+}
+
+model ItemPrice {
+  id        String   @id @default(cuid())
+  itemId    String
+  sellerId  String
+  price     Int
+  createdAt DateTime @default(now())
+
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model TradePost {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  itemHave    String
+  itemWant    String
+  description String
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SaleListing {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  itemId      String
+  item        Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  price       Int
+  description String
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  senderId  String
+  receiverId String
+  message   String
+  timestamp DateTime @default(now())
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  sessionToken String @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

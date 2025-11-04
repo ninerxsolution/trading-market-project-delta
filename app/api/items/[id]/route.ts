@@ -1,0 +1,53 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+
+// PATCH /api/items/[id] - update NPC fields (SUPER_ADMIN only; simple check relies on caller)
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+	try {
+		const { id } = await context.params;
+		const cookie = request.headers.get('cookie') || '';
+		const sessionRes = await fetch(`${request.nextUrl.origin}/api/auth/session`, { credentials: 'include', headers: { cookie } });
+		const sessionData = await sessionRes.json();
+		if (!sessionRes.ok || !sessionData?.user || sessionData.user.role !== 'SUPER_ADMIN') {
+			return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+		}
+		const body = await request.json();
+		const { npcBuyPrice, npcSellPrice, availability, image } = body;
+
+		const updated = await prisma.item.update({
+			where: { id },
+			data: {
+				npcBuyPrice,
+				npcSellPrice,
+				availability,
+				image,
+			},
+		});
+
+		return NextResponse.json({ success: true, item: updated });
+	} catch (error) {
+		console.error('PATCH /api/items/[id] error:', error);
+		return NextResponse.json({ success: false }, { status: 500 });
+	}
+}
+
+// DELETE /api/items/[id] - delete item (SUPER_ADMIN only)
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+	try {
+		const { id } = await context.params;
+		const cookie = request.headers.get('cookie') || '';
+		const sessionRes = await fetch(`${request.nextUrl.origin}/api/auth/session`, { credentials: 'include', headers: { cookie } });
+		const sessionData = await sessionRes.json();
+		if (!sessionRes.ok || !sessionData?.user || sessionData.user.role !== 'SUPER_ADMIN') {
+			return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+		}
+
+		await prisma.item.delete({ where: { id } });
+		return NextResponse.json({ success: true });
+	} catch (error) {
+		console.error('DELETE /api/items/[id] error:', error);
+		return NextResponse.json({ success: false }, { status: 500 });
+	}
+}
+
+
