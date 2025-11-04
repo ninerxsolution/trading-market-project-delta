@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { MessageCircle, Calendar, Package } from 'lucide-react';
+import { MessageCircle, Calendar, Package, DollarSign } from 'lucide-react';
 import { useData } from '@/lib/contexts/data-context';
 import { useChat } from '@/lib/contexts/chat-context';
 import { useAuth } from '@/lib/contexts/auth-context';
@@ -22,6 +22,7 @@ export default function ProfilePage() {
 	const [profileUser, setProfileUser] = useState<User | null>(null);
 	const [userTradePosts, setUserTradePosts] = useState<TradePost[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [sales, setSales] = useState<{ listings: Array<{ id: string; price: number; description: string; image: string; createdAt: string; item: { id: string; name: string; image: string; rarity: string } }>; summary: { count: number; total: number } } | null>(null);
 
 	useEffect(() => {
 		let isCancelled = false;
@@ -35,6 +36,13 @@ export default function ProfilePage() {
 					if (!isCancelled && data.user) {
 						setProfileUser(data.user);
 						setUserTradePosts([]);
+						try {
+							const sres = await fetch(`/api/users/${encodeURIComponent(username)}/listings`);
+							if (sres.ok) {
+								const sdata = await sres.json();
+								setSales(sdata);
+							}
+						} catch {}
 						setLoading(false);
 						return;
 					}
@@ -56,13 +64,32 @@ export default function ProfilePage() {
 		return () => { isCancelled = true; };
 	}, [username]);
 
+	// Load sales/listings when profileUser known
+	useEffect(() => {
+		const loadSales = async () => {
+			if (!profileUser) return;
+			try {
+				const sres = await fetch(`/api/users/${encodeURIComponent(profileUser.username)}/listings`);
+				if (sres.ok) {
+					const sdata = await sres.json();
+					setSales(sdata);
+				} else {
+					setSales({ listings: [], summary: { count: 0, total: 0 } });
+				}
+			} catch {
+				setSales({ listings: [], summary: { count: 0, total: 0 } });
+			}
+		};
+		loadSales();
+	}, [profileUser]);
+
 	if (loading) {
 		return (
 			<div className="container mx-auto px-4 py-8">
 				<div className="text-center py-12">
 					<p className="text-xl text-muted-foreground">Loading...</p>
 				</div>
-			</div>
+		</div>
 		);
 	}
 
@@ -145,6 +172,48 @@ export default function ProfilePage() {
 					</div>
 				</div>
 			</div>
+
+		{/* Sales summary & listings */}
+		<div className="mt-8">
+			<h2 className="text-2xl font-bold mb-4">Sales Overview</h2>
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+				<div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+					<DollarSign className="h-5 w-5" />
+					<div>
+						<p className="text-sm text-muted-foreground">Total Listings</p>
+						<p className="text-xl font-bold">{sales?.summary?.count ?? 0}</p>
+					</div>
+				</div>
+				<div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+					<DollarSign className="h-5 w-5" />
+					<div>
+						<p className="text-sm text-muted-foreground">Total Value</p>
+						<p className="text-xl font-bold">{(sales?.summary?.total ?? 0).toLocaleString()} R$</p>
+					</div>
+				</div>
+			</div>
+
+			<h3 className="text-xl font-semibold mb-3">Items for Sale</h3>
+			{!sales || sales.listings.length === 0 ? (
+				<div className="text-center py-8 bg-card rounded-xl border border-border text-muted-foreground">No items listed</div>
+			) : (
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+					{sales.listings.map((l) => (
+						<div key={l.id} className="bg-card rounded-xl border border-border p-4 flex gap-3">
+							<div className="relative w-20 h-20 rounded overflow-hidden bg-muted flex-shrink-0">
+								<Image src={l.image} alt={l.item.name} fill className="object-cover" unoptimized />
+							</div>
+							<div className="min-w-0 flex-1">
+								<p className="font-semibold truncate">{l.item.name}</p>
+								<p className="text-xs text-muted-foreground truncate mb-1">{l.description}</p>
+								<p className="text-sm font-bold">{l.price.toLocaleString()} R$</p>
+								<p className="text-xs text-muted-foreground">{new Date(l.createdAt).toLocaleDateString()}</p>
+							</div>
+						</div>
+					))}
+				</div>
+			)}
+		</div>
 
 			<div>
 				<h2 className="text-2xl font-bold mb-4">Active Trade Posts</h2>

@@ -102,6 +102,8 @@ export default function AdminItemsPage() {
 		const { url } = await up.json();
 		const res = await fetch(`/api/items/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: url }) });
 		if (!res.ok) { alert('Update image failed'); return; }
+		// Optimistic preview without waiting for full reload
+		setItems(prev => prev.map(it => it.id === id ? { ...it, image: url } : it));
 		reload();
 	};
 
@@ -119,7 +121,7 @@ export default function AdminItemsPage() {
 				<Link href="/admin" className="text-sm text-primary underline">Back to Admin</Link>
 			</div>
 
-			<form onSubmit={createItem} className="mb-6 grid gap-3 grid-cols-1 md:grid-cols-7 items-end">
+				<form onSubmit={createItem} className="mb-6 grid gap-3 grid-cols-1 md:grid-cols-8 items-end">
 				<div>
 					<label className="text-xs">Name</label>
 					<input className="w-full border border-border rounded px-2 py-1" value={newItem.name} onChange={e=>setNewItem({...newItem, name: e.target.value})} required />
@@ -146,6 +148,12 @@ export default function AdminItemsPage() {
 					<label className="text-xs">Image</label>
 					<input type="file" accept="image/*" className="w-full border border-border rounded px-2 py-1" onChange={e=>setImageFile(e.currentTarget.files?.[0] ?? null)} />
 				</div>
+				{imageFile ? (
+					<div className="flex items-center gap-2">
+						<label className="text-xs opacity-0">Preview</label>
+						<img src={URL.createObjectURL(imageFile)} alt="preview" className="w-16 h-10 object-cover rounded border" />
+					</div>
+				) : null}
 				<div>
 					<label className="text-xs">NPC Buy</label>
 					<input type="number" className="w-full border border-border rounded px-2 py-1" value={newItem.npcBuyPrice} onChange={e=>setNewItem({...newItem, npcBuyPrice: e.target.value})} />
@@ -180,7 +188,8 @@ export default function AdminItemsPage() {
 									<div className="text-muted-foreground line-clamp-1 max-w-[420px]">{it.description}</div>
 								</td>
 								<td className="p-3">
-									<div className="flex items-center gap-2">
+									<div className="flex items-center gap-3">
+										<img src={it.image} alt="thumb" className="w-12 h-8 object-cover rounded border" />
 										<input type="file" accept="image/*" onChange={(e)=>changeImage(it.id, e.currentTarget.files?.[0] ?? null)} />
 									</div>
 								</td>

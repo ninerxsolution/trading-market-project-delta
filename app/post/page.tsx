@@ -10,7 +10,8 @@ import { cn } from '@/lib/utils';
 export default function PostTradePage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [items, setItems] = useState<{ id: string; name: string; rarity: string }[]>([]);
+  const [items, setItems] = useState<{ id: string; name: string; rarity: string; image: string }[]>([]);
+  const [itemQuery, setItemQuery] = useState('');
   const [itemId, setItemId] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
@@ -29,7 +30,7 @@ export default function PostTradePage() {
         if (res.ok) {
           const data = await res.json();
           setItems(
-            (data.items || []).map((it: any) => ({ id: it.id, name: it.name, rarity: it.rarity }))
+            (data.items || []).map((it: any) => ({ id: it.id, name: it.name, rarity: it.rarity, image: it.image }))
           );
         }
       } catch {}
@@ -90,27 +91,48 @@ export default function PostTradePage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="itemId" className="block text-sm font-semibold mb-2">
-            Item *
-          </label>
-          <select
-            id="itemId"
-            value={itemId}
-            onChange={(e) => setItemId(e.target.value)}
+          <label className="block text-sm font-semibold mb-2">Item *</label>
+          <input
+            type="text"
+            value={itemQuery}
+            onChange={(e) => setItemQuery(e.target.value)}
+            placeholder="Search items..."
             className={cn(
-              "w-full px-4 py-3 rounded-xl border border-border bg-background",
-              "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
-              "transition-all"
+              "w-full px-4 py-2 mb-3 rounded-lg border border-border bg-background",
+              "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             )}
-            required
-          >
-            <option value="">Select an item...</option>
-            {items.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name} ({item.rarity})
-              </option>
-            ))}
-          </select>
+          />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-72 overflow-y-auto border border-border rounded-xl p-3 bg-muted/20">
+            {items
+              .filter(it => {
+                const q = itemQuery.trim().toLowerCase();
+                if (!q) return true;
+                return it.name.toLowerCase().includes(q);
+              })
+              .map((it) => (
+                <button
+                  type="button"
+                  key={it.id}
+                  onClick={() => setItemId(it.id)}
+                  className={cn(
+                    "flex items-center gap-3 p-2 rounded-lg border transition-colors text-left",
+                    itemId === it.id ? "border-primary bg-primary/10" : "border-border hover:bg-background"
+                  )}
+                >
+                  <div className="relative w-12 h-12 rounded bg-muted overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={it.image} alt={it.name} className="object-cover w-full h-full" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">{it.name}</p>
+                    <p className="text-xs text-muted-foreground">{it.rarity}</p>
+                  </div>
+                </button>
+              ))}
+          </div>
+          {itemId && (
+            <p className="mt-2 text-xs text-muted-foreground">Selected: {items.find(i=>i.id===itemId)?.name}</p>
+          )}
         </div>
 
         <div>
