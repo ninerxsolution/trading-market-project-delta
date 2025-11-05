@@ -106,3 +106,29 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+enum OrderStatus {
+  RESERVED
+  AWAITING_SELLER_CONFIRM
+  AWAITING_BUYER_CONFIRM
+  COMPLETED
+  DISPUTE
+  CANCELLED
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  listingId     String      // SaleListing ID (or mock listing ID)
+  itemId        String
+  sellerId      String
+  buyerId       String
+  price         Int
+  status        OrderStatus @default(RESERVED)
+  proofImages   String      // JSON array of proof image URLs/base64
+  disputeReason String?
+  adminNotes    String?
+  expiresAt     DateTime?
+  lastReminderAt DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}

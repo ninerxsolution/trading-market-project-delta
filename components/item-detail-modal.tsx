@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useChat } from '@/lib/contexts/chat-context';
 import { useAuth } from '@/lib/contexts/auth-context';
+import { useOrder } from '@/lib/contexts/order-context';
+import { ShoppingCart } from 'lucide-react';
 
 type BasicItem = {
   id: string;
@@ -33,6 +35,7 @@ const rarityColors = {
 export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
   const { openChat } = useChat();
   const { user } = useAuth();
+  const { createOrder, getOrdersForListing } = useOrder();
   const [sellers, setSellers] = React.useState<Array<{ id: string; username: string; avatar: string; bio: string; price?: number }>>([]);
   React.useEffect(() => {
     let ignore = false;
@@ -63,6 +66,43 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
       setTimeout(() => {
         onClose();
       }, 100);
+    }
+  };
+
+  const handleBuy = async (sellerId: string, sellerPrice?: number) => {
+    if (!user || !item) return;
+    
+    // Create a mock listingId
+    const listingId = `listing-${sellerId}-${item.id}`;
+    const price = sellerPrice || item.averagePrice || item.avgSellerPrice || 0;
+    
+    // Check if there's already an active order for this listing
+    const existingOrders = getOrdersForListing(listingId);
+    const activeOrder = existingOrders.find(o => 
+      o.status === 'RESERVED' || 
+      o.status === 'AWAITING_SELLER_CONFIRM' || 
+      o.status === 'AWAITING_BUYER_CONFIRM'
+    );
+    
+    if (activeOrder) {
+      alert('This listing is already reserved. Please wait for the current order to complete.');
+      return;
+    }
+    
+    try {
+      // Create order and reserve listing
+      await createOrder(listingId, item.id, sellerId, user.id, price);
+      
+      // Open chat with seller
+      openChat(sellerId);
+      
+      // Close modal
+      setTimeout(() => {
+        onClose();
+      }, 100);
+    } catch (error) {
+      console.error('Failed to create order:', error);
+      alert('Failed to create order. Please try again.');
     }
   };
 
@@ -144,13 +184,22 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
                       </div>
                     </div>
                     {user && user.id !== seller.id && (
-                      <button
-                        onClick={() => handleChatWithOwner(seller.id)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        Chat
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleBuy(seller.id, seller.price)}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+                        >
+                          <ShoppingCart className="h-4 w-4" />
+                          Buy
+                        </button>
+                        <button
+                          onClick={() => handleChatWithOwner(seller.id)}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          Chat
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))}

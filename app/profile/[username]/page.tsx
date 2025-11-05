@@ -7,8 +7,7 @@ import { MessageCircle, Calendar, Package, DollarSign } from 'lucide-react';
 import { useData } from '@/lib/contexts/data-context';
 import { useChat } from '@/lib/contexts/chat-context';
 import { useAuth } from '@/lib/contexts/auth-context';
-import { getUserByUsername, getTradePostsByUserId, getItemById } from '@/lib/mock-data';
-import { User, TradePost, Item } from '@/lib/mock-data';
+import { User, TradePost, Item } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -49,14 +48,10 @@ export default function ProfilePage() {
 				}
 			} catch {}
 
-			// Fallback to mock
-			const user = getUserByUsername(username);
+			// If DB fetch failed, user not found
 			if (!isCancelled) {
-				setProfileUser(user || null);
-				if (user) {
-					const posts = getTradePostsByUserId(user.id);
-					setUserTradePosts(posts);
-				}
+				setProfileUser(null);
+				setUserTradePosts([]);
 				setLoading(false);
 			}
 		};
@@ -224,9 +219,7 @@ export default function ProfilePage() {
 				) : (
 					<div className="space-y-4">
 						{userTradePosts.map((post) => {
-							const itemHave = getItemById(post.itemHave);
-							const itemWant = getItemById(post.itemWant);
-							
+							// Items are referenced by ID, we'll need to fetch them or use item names from post
 							return (
 								<div
 									key={post.id}
@@ -249,12 +242,12 @@ export default function ProfilePage() {
 											<div className="flex flex-col md:flex-row gap-4 mb-3">
 												<div className="flex-1">
 													<p className="text-sm text-muted-foreground mb-1">Trading</p>
-													<p className="font-semibold">{itemHave?.name || 'Unknown Item'}</p>
+													<p className="font-semibold">{post.itemHave}</p>
 												</div>
 												<div className="text-2xl text-muted-foreground">→</div>
 												<div className="flex-1">
 													<p className="text-sm text-muted-foreground mb-1">For</p>
-													<p className="font-semibold">{itemWant?.name || 'Unknown Item'}</p>
+													<p className="font-semibold">{post.itemWant}</p>
 												</div>
 											</div>
 											

@@ -53,6 +53,10 @@ export default function AdminPage() {
 			<h1 className="text-3xl font-bold mb-4">Admin Management</h1>
 			<p className="text-muted-foreground mb-6">Signed in as {user?.username} ({user?.role})</p>
 			<div className="grid gap-4">
+				<Link href="/admin/disputes" className="rounded-xl border border-border p-6 hover:bg-muted/50 transition-colors">
+					<h2 className="font-semibold mb-2">Dispute Resolution</h2>
+					<p className="text-sm text-muted-foreground">Review and resolve order disputes</p>
+				</Link>
 				<div className="rounded-xl border border-border p-6">
 					<h2 className="font-semibold mb-2">Users</h2>
 					<p className="text-sm text-muted-foreground">Manage users (placeholder)</p>

@@ -5,14 +5,18 @@ import { X, Minimize2, Maximize2, MessageCircle, Send } from 'lucide-react';
 import Image from 'next/image';
 import { useChat } from '@/lib/contexts/chat-context';
 import { useAuth } from '@/lib/contexts/auth-context';
+import { useOrder } from '@/lib/contexts/order-context';
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Package, CheckCircle, Upload, AlertCircle } from 'lucide-react';
 
 export function ChatBar() {
   const { user } = useAuth();
   const { chats, closeChat, sendMessage, getChat, loadHistory } = useChat();
+  const { getOrderByChat, updateOrderStatus, addProofImage, orders, getOrdersForUser, refreshOrders } = useOrder();
   const [expandedChat, setExpandedChat] = useState<string | null>(null);
   const [messageInputs, setMessageInputs] = useState<Record<string, string>>({});
+  const [proofImageInputs, setProofImageInputs] = useState<Record<string, string>>({});
   const messageEndRefs = useRef<Record<string, HTMLDivElement>>({});
   const prevChatsLength = useRef(0);
 
@@ -34,15 +38,20 @@ export function ChatBar() {
   }, [chats]);
 
   // When expanding a chat manually, ensure history is loaded if empty
+  // Also refresh orders to ensure latest data is available
   useEffect(() => {
     if (!expandedChat || !user) return;
     const chat = chats.find(c => c.id === expandedChat);
     if (!chat) return;
+    
+    // Refresh orders when chat is expanded to ensure latest data
+    refreshOrders();
+    
     if ((chat.messages?.length || 0) === 0) {
       const other = chat.participants.find(id => id !== user.id);
       if (other) loadHistory(other);
     }
-  }, [expandedChat, chats, user]);
+  }, [expandedChat, chats, user, refreshOrders, loadHistory]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -88,6 +97,35 @@ export function ChatBar() {
     };
     load();
   }, [chats, user]);
+
+  // Auto-transition RESERVED orders to AWAITING_SELLER_CONFIRM when seller opens chat
+  // Also refresh orders when chat is expanded to ensure latest data is loaded
+  useEffect(() => {
+    if (!user || !expandedChat) return;
+    
+    const chat = chats.find(c => c.id === expandedChat);
+    if (!chat) return;
+    
+    const otherUserId = chat.participants.find(id => id !== user.id);
+    if (!otherUserId) return;
+    
+    // Force a re-check of orders by accessing the orders array
+    // Orders are loaded from API via polling
+    const order = getOrderByChat(otherUserId, user.id);
+    
+    if (order && order.status === 'RESERVED' && order.sellerId === user.id) {
+      // Auto-transition to AWAITING_SELLER_CONFIRM when seller first views the chat
+      // Use a small delay to avoid race conditions
+      const timer = setTimeout(async () => {
+        try {
+          await updateOrderStatus(order.id, 'AWAITING_SELLER_CONFIRM');
+        } catch (error) {
+          console.error('Failed to update order status:', error);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [expandedChat, user, chats, orders, getOrderByChat, updateOrderStatus]);
 
   // Early return after all hooks
   if (!user || chats.length === 0) return null;
@@ -185,7 +223,19 @@ export function ChatBar() {
                       No messages yet. Start the conversation!
                     </p>
                   ) : (
-                    messages.map((message) => {
+                    // Deduplicate messages by ID and sort by timestamp
+                    (() => {
+                      const seen = new Set<string>();
+                      const uniqueMessages = messages
+                        .filter(msg => {
+                          if (seen.has(msg.id)) {
+                            return false;
+                          }
+                          seen.add(msg.id);
+                          return true;
+                        })
+                        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+                      return uniqueMessages.map((message) => {
                       const isOwnMessage = message.senderId === user.id;
                       const messageUser = message.senderId === user.id ? userCache[user.id] || { avatar: '', username: '' } : userCache[message.senderId];
 
@@ -231,12 +281,272 @@ export function ChatBar() {
                           </div>
                         </div>
                       );
-                    })
+                    });
+                    })()
                   )}
                   <div ref={(el) => {
                     if (el) messageEndRefs.current[chat.id] = el;
                   }} />
                 </div>
+
+                {/* Order Action Buttons */}
+                {(() => {
+                  if (!user) return null;
+                  
+                  // Get order for this chat - try both directions
+                  const order = getOrderByChat(otherUserId, user.id);
+                  
+                  if (!order) {
+                    // Debug: log when no order is found (uncomment for debugging)
+                    // console.log('No order found for chat:', { 
+                    //   otherUserId, 
+                    //   currentUserId: user.id,
+                    //   allOrders: getOrdersForUser(user.id),
+                    //   allOrdersInContext: orders.length
+                    // });
+                    return null;
+                  }
+
+                  const isSeller = order.sellerId === user.id;
+                  const isBuyer = order.buyerId === user.id;
+                  
+                  // Debug: log when order is found (uncomment for debugging)
+                  // console.log('Order found for chat:', { 
+                  //   orderId: order.id,
+                  //   status: order.status,
+                  //   sellerId: order.sellerId,
+                  //   buyerId: order.buyerId,
+                  //   currentUserId: user.id,
+                  //   isSeller,
+                  //   isBuyer
+                  // });
+                  
+                  // Ensure we have a valid order and user is involved
+                  if (!isSeller && !isBuyer) {
+                    console.warn('Order found but user is not seller or buyer:', { order, userId: user.id });
+                    return null;
+                  }
+                  
+                  const proofInput = proofImageInputs[chat.id] || '';
+
+                  // Show different buttons based on order status and user role
+                  // Handle RESERVED status (should auto-transition to AWAITING_SELLER_CONFIRM when seller views)
+                  if (order.status === 'RESERVED') {
+                    if (isSeller) {
+                      return (
+                        <div className="p-3 border-t border-border bg-muted/30 space-y-2">
+                          <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
+                            <Package className="h-4 w-4 text-blue-600" />
+                            <span className="text-sm font-semibold text-blue-700">
+                              Order Reserved - Mark as Sent
+                            </span>
+                          </div>
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              value={proofInput}
+                              onChange={(e) =>
+                                setProofImageInputs(prev => ({ ...prev, [chat.id]: e.target.value }))
+                              }
+                              placeholder="Attach proof image URL (or mock base64)"
+                              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                            />
+                            <button
+                              onClick={async () => {
+                                try {
+                                  if (proofInput.trim()) {
+                                    // Add proof image and update status to AWAITING_BUYER_CONFIRM
+                                    await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM', {
+                                      proofImages: [...order.proofImages, proofInput.trim()],
+                                    });
+                                    setProofImageInputs(prev => ({ ...prev, [chat.id]: '' }));
+                                  } else {
+                                    // Allow marking as sent without proof
+                                    await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM');
+                                  }
+                                } catch (error) {
+                                  console.error('Failed to update order:', error);
+                                  alert('Failed to update order. Please try again.');
+                                }
+                              }}
+                              className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                            >
+                              <Upload className="h-4 w-4" />
+                              Mark as Sent
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="p-3 border-t border-border bg-muted/30">
+                          <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
+                            <Package className="h-4 w-4 text-blue-600" />
+                            <span className="text-sm font-semibold text-blue-700">
+                              Order Reserved - Waiting for seller to mark as sent...
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+                  }
+
+                  if (order.status === 'AWAITING_SELLER_CONFIRM') {
+                    if (isSeller) {
+                      return (
+                        <div className="p-3 border-t border-border bg-muted/30 space-y-2">
+                          <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
+                            <Package className="h-4 w-4 text-blue-600" />
+                            <span className="text-sm font-semibold text-blue-700">
+                              Mark as Sent
+                            </span>
+                          </div>
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              value={proofInput}
+                              onChange={(e) =>
+                                setProofImageInputs(prev => ({ ...prev, [chat.id]: e.target.value }))
+                              }
+                              placeholder="Attach proof image URL (or mock base64)"
+                              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                            />
+                            <button
+                              onClick={async () => {
+                                try {
+                                  if (proofInput.trim()) {
+                                    // Add proof image and update status to AWAITING_BUYER_CONFIRM
+                                    await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM', {
+                                      proofImages: [...order.proofImages, proofInput.trim()],
+                                    });
+                                    setProofImageInputs(prev => ({ ...prev, [chat.id]: '' }));
+                                  } else {
+                                    // Allow marking as sent without proof
+                                    await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM');
+                                  }
+                                } catch (error) {
+                                  console.error('Failed to update order:', error);
+                                  alert('Failed to update order. Please try again.');
+                                }
+                              }}
+                              className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                            >
+                              <Upload className="h-4 w-4" />
+                              Mark as Sent
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="p-3 border-t border-border bg-muted/30">
+                          <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
+                            <Package className="h-4 w-4 text-blue-600" />
+                            <span className="text-sm font-semibold text-blue-700">
+                              Waiting for seller to mark as sent...
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+                  }
+
+                  if (order.status === 'AWAITING_BUYER_CONFIRM') {
+                    if (isBuyer) {
+                      return (
+                        <div className="p-3 border-t border-border bg-muted/30 space-y-2">
+                          <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/20 border border-green-500/50">
+                            <Package className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-semibold text-green-700">
+                              Confirm Received
+                            </span>
+                          </div>
+                          {order.proofImages.length > 0 && (
+                            <div className="space-y-1">
+                              <p className="text-xs text-muted-foreground">Proof images:</p>
+                              <div className="flex flex-wrap gap-2">
+                                {order.proofImages.map((proof, idx) => (
+                                  <div key={idx} className="text-xs p-2 rounded bg-background border border-border">
+                                    {proof.length > 50 ? `${proof.substring(0, 50)}...` : proof}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          <button
+                            onClick={async () => {
+                              try {
+                                await updateOrderStatus(order.id, 'COMPLETED');
+                              } catch (error) {
+                                console.error('Failed to update order:', error);
+                                alert('Failed to update order. Please try again.');
+                              }
+                            }}
+                            className="w-full px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                            Confirm Received
+                          </button>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="p-3 border-t border-border bg-muted/30">
+                          <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/20 border border-green-500/50">
+                            <Package className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-semibold text-green-700">
+                              Waiting for buyer to confirm receipt...
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+                  }
+
+                  if (order.status === 'DISPUTE') {
+                    return (
+                      <div className="p-3 border-t border-border bg-muted/30">
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-red-500/20 border border-red-500/50">
+                          <AlertCircle className="h-4 w-4 text-red-600" />
+                          <span className="text-sm font-semibold text-red-700">
+                            Order in Dispute - Admin review pending
+                          </span>
+                          {order.disputeReason && (
+                            <p className="text-xs text-red-600 mt-1">{order.disputeReason}</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (order.status === 'COMPLETED') {
+                    return (
+                      <div className="p-3 border-t border-border bg-muted/30">
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/20 border border-green-500/50">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-semibold text-green-700">
+                            Order Completed
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (order.status === 'CANCELLED') {
+                    return (
+                      <div className="p-3 border-t border-border bg-muted/30">
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-gray-500/20 border border-gray-500/50">
+                          <AlertCircle className="h-4 w-4 text-gray-600" />
+                          <span className="text-sm font-semibold text-gray-700">
+                            Order Cancelled
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return null;
+                })()}
 
                 {/* Message Input */}
                 <div className="p-3 border-t border-border bg-background">

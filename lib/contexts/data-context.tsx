@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
-import { TradePost, Item, User, mockItems, mockUsers, mockTradePosts } from '../mock-data';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { TradePost, Item, User } from '../types';
 
 interface DataContextType {
   items: Item[];
@@ -13,17 +13,57 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  const [items] = useState<Item[]>(mockItems);
-  const [users] = useState<User[]>(mockUsers);
-  const [tradePosts, setTradePosts] = useState<TradePost[]>(mockTradePosts);
+  const [items, setItems] = useState<Item[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [tradePosts, setTradePosts] = useState<TradePost[]>([]);
 
-  const addTradePost = (post: Omit<TradePost, 'id' | 'createdAt'>) => {
-    const newPost: TradePost = {
-      ...post,
-      id: String(tradePosts.length + 1),
-      createdAt: new Date().toISOString(),
+  // Load items from API
+  useEffect(() => {
+    const loadItems = async () => {
+      try {
+        const res = await fetch('/api/items');
+        if (res.ok) {
+          const data = await res.json();
+          setItems(data.items || []);
+        }
+      } catch (e) {
+        console.error('Failed to load items:', e);
+      }
     };
-    setTradePosts(prev => [...prev, newPost]);
+    loadItems();
+  }, []);
+
+  // Load trade posts from API
+  useEffect(() => {
+    const loadTradePosts = async () => {
+      try {
+        const res = await fetch('/api/trade-posts');
+        if (res.ok) {
+          const data = await res.json();
+          setTradePosts(data.posts || []);
+        }
+      } catch (e) {
+        console.error('Failed to load trade posts:', e);
+      }
+    };
+    loadTradePosts();
+  }, []);
+
+  const addTradePost = async (post: Omit<TradePost, 'id' | 'createdAt'>) => {
+    try {
+      const res = await fetch('/api/trade-posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(post),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTradePosts(prev => [...prev, data.post]);
+      }
+    } catch (e) {
+      console.error('Failed to add trade post:', e);
+    }
   };
 
   return (
