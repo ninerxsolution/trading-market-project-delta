@@ -15,7 +15,6 @@ import { ArrowLeft } from 'lucide-react';
 export default function ProfilePage() {
 	const params = useParams();
 	const username = params.username as string;
-	const { tradePosts } = useData();
 	const { openChat } = useChat();
 	const { user: currentUser } = useAuth();
 	const [profileUser, setProfileUser] = useState<User | null>(null);
@@ -210,60 +209,7 @@ export default function ProfilePage() {
 			)}
 		</div>
 
-			<div>
-				<h2 className="text-2xl font-bold mb-4">Active Trade Posts</h2>
-				{userTradePosts.length === 0 ? (
-					<div className="text-center py-12 bg-card rounded-2xl border border-border">
-						<p className="text-muted-foreground">No active trade posts</p>
-					</div>
-				) : (
-					<div className="space-y-4">
-						{userTradePosts.map((post) => {
-							// Items are referenced by ID, we'll need to fetch them or use item names from post
-							return (
-								<div
-									key={post.id}
-									className="bg-card rounded-xl border border-border p-6 hover:border-primary transition-colors"
-								>
-									<div className="flex flex-col md:flex-row gap-4">
-										{post.image && (
-											<div className="relative w-full md:w-32 h-32 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-												<Image
-													src={post.image}
-													alt="Trade post"
-													fill
-													className="object-cover"
-													unoptimized
-												/>
-											</div>
-										)}
-										
-										<div className="flex-1">
-											<div className="flex flex-col md:flex-row gap-4 mb-3">
-												<div className="flex-1">
-													<p className="text-sm text-muted-foreground mb-1">Trading</p>
-													<p className="font-semibold">{post.itemHave}</p>
-												</div>
-												<div className="text-2xl text-muted-foreground">→</div>
-												<div className="flex-1">
-													<p className="text-sm text-muted-foreground mb-1">For</p>
-													<p className="font-semibold">{post.itemWant}</p>
-												</div>
-											</div>
-											
-											<p className="text-muted-foreground mb-3">{post.description}</p>
-											
-											<p className="text-xs text-muted-foreground">
-												Posted {new Date(post.createdAt).toLocaleDateString()}
-											</p>
-										</div>
-									</div>
-								</div>
-							);
-						})}
-					</div>
-				)}
-			</div>
+			
 		</div>
 	);
 }

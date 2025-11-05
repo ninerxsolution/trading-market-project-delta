@@ -30,6 +30,11 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true);
       const res = await fetch('/api/orders', { credentials: 'include' });
+      if (res.status === 401) {
+        // Not logged in: silently clear orders without noisy error
+        setOrders([]);
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setOrders(data.orders || []);
