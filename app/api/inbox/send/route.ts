@@ -11,14 +11,15 @@ export async function POST(request: NextRequest) {
 		if (!sessionRes.ok || !sessionData?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		const senderId: string = sessionData.user.id;
 
-		const { toUserId, message } = await request.json();
+		const { toUserId, message, orderId } = await request.json();
 		if (!toUserId || !message || !message.trim()) return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
 
-    const msg = await prisma.chatMessage.create({
+		const msg = await prisma.chatMessage.create({
 			data: {
 				senderId,
 				receiverId: toUserId,
 				message,
+        orderId: orderId || null,
 			},
 		});
 

@@ -6,7 +6,7 @@ import { Order, OrderStatus, User } from '../types';
 interface OrderContextType {
   orders: Order[];
   isLoading: boolean;
-  createOrder: (listingId: string, itemId: string, sellerId: string, buyerId: string, price: number) => Promise<Order>;
+  createOrder: (listingId: string, itemId: string, sellerId: string, buyerId: string, price: number, quantity?: number) => Promise<Order>;
   updateOrderStatus: (orderId: string, status: OrderStatus, data?: { proofImages?: string[]; disputeReason?: string }) => Promise<void>;
   getOrderByChat: (userId1: string, userId2: string) => Order | undefined;
   getOrdersForUser: (userId: string) => Order[];
@@ -55,24 +55,88 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     loadOrders();
   }, [loadOrders]);
 
-  // Poll for order updates every 5 seconds (for real-time updates)
+  // Smarter polling with visibility/backoff and ETag support
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      loadOrders();
-    }, 5000); // Poll every 5 seconds
+    let mounted = true;
+    let etag: string | undefined;
+    let timer: any;
+    let intervalMs = 15000; // start at 15s (lighter than 5s)
+
+    const isHidden = () => typeof document !== 'undefined' && document.visibilityState === 'hidden';
+
+    const tick = async () => {
+      if (!mounted) return;
+      if (isHidden()) return;
+      try {
+        setIsLoading(true);
+        const res = await fetch('/api/orders', {
+          credentials: 'include',
+          headers: etag ? { 'If-None-Match': etag } : undefined,
+        });
+
+        if (res.status === 401) {
+          setOrders([]);
+          return;
+        }
+
+        if (res.status === 304) {
+          // No change -> exponential backoff up to 60s
+          intervalMs = Math.min(intervalMs * 2, 60000);
+          return;
+        }
+
+        if (res.ok) {
+          const newEtag = res.headers.get('ETag') || undefined;
+          if (newEtag) etag = newEtag;
+          const data = await res.json();
+          setOrders(data.orders || []);
+          // Reset interval on change
+          intervalMs = 15000;
+        } else {
+          setOrders([]);
+        }
+      } catch {
+        // network error -> backoff
+        intervalMs = Math.min(intervalMs * 2, 60000);
+      } finally {
+        setIsLoading(false);
+        if (mounted) {
+          clearTimeout(timer);
+          timer = setTimeout(tick, intervalMs);
+        }
+      }
+    };
+
+    // start soon after mount to allow initial loadOrders to run
+    timer = setTimeout(tick, 2000);
+
+    const onVisibility = () => {
+      if (!isHidden()) {
+        intervalMs = 15000;
+        clearTimeout(timer);
+        timer = setTimeout(tick, 0);
+      }
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', onVisibility);
+    }
 
     return () => {
-      clearInterval(intervalId);
+      mounted = false;
+      clearTimeout(timer);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', onVisibility);
+      }
     };
-  }, [loadOrders]);
+  }, []);
 
-  const createOrder = useCallback(async (listingId: string, itemId: string, sellerId: string, buyerId: string, price: number): Promise<Order> => {
+  const createOrder = useCallback(async (listingId: string, itemId: string, sellerId: string, buyerId: string, price: number, quantity?: number): Promise<Order> => {
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ listingId, itemId, sellerId, buyerId, price }),
+        body: JSON.stringify({ listingId, itemId, sellerId, buyerId, price, quantity }),
       });
 
       if (!res.ok) {

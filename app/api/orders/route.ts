@@ -5,14 +5,31 @@ import type { Order as PrismaOrder } from '@prisma/client';
 type OrderDto = Omit<PrismaOrder, 'proofImages'> & { proofImages: string[] };
 type PrismaErrorWithCode = { code?: string };
 
+async function reapExpiredOrders() {
+  try {
+    await prisma.order.updateMany({
+      where: {
+        expiresAt: { lt: new Date() },
+        status: { in: ['RESERVED','AWAITING_SELLER_CONFIRM','AWAITING_BUYER_CONFIRM'] },
+      },
+      data: { status: 'DISPUTE' },
+    });
+  } catch {
+    // ignore reaper failures
+  }
+}
+
 // GET /api/orders - get all orders for current user
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     // Debug: Check if prisma is defined
     if (!prisma) {
       console.error('[orders] prisma is undefined!');
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
     }
+
+    // Lazy server-side reaper for expired orders
+    await reapExpiredOrders();
 
     // Get session from cookie directly (same logic as /api/auth/session)
     const cookieStore = await cookies();
@@ -63,7 +80,14 @@ export async function GET() {
       proofImages: order.proofImages ? (JSON.parse(order.proofImages) as string[]) : [],
     }));
 
-    return NextResponse.json({ orders: ordersWithArrays });
+    // ETag support for lighter polling
+    const body = JSON.stringify({ orders: ordersWithArrays });
+    const etag = '"' + Buffer.from(body).toString('base64url') + '"';
+    const ifNoneMatch = request.headers.get('if-none-match');
+    if (ifNoneMatch && ifNoneMatch === etag) {
+      return new NextResponse(null, { status: 304, headers: { ETag: etag } });
+    }
+    return new NextResponse(body, { headers: { 'Content-Type': 'application/json', ETag: etag } });
   } catch (error) {
     console.error('GET /api/orders error:', error);
     return NextResponse.json({ error: 'Failed to get orders' }, { status: 500 });
@@ -73,6 +97,9 @@ export async function GET() {
 // POST /api/orders - create a new order
 export async function POST(request: NextRequest) {
   try {
+    // Lazy server-side reaper
+    await reapExpiredOrders();
+
     // Get session from cookie directly
     const cookieStore = await cookies();
     const sessionToken = cookieStore.get('session_token')?.value;
@@ -91,7 +118,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { listingId, itemId, sellerId, buyerId, price } = await request.json();
+    const { listingId, itemId, sellerId, buyerId, price, quantity } = await request.json();
     
     if (!listingId || !itemId || !sellerId || !buyerId || typeof price !== 'number' || price <= 0) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
@@ -119,6 +146,22 @@ export async function POST(request: NextRequest) {
 
     if (existingOrders.length > 0) {
       return NextResponse.json({ error: 'Listing is already reserved' }, { status: 400 });
+    }
+
+    // Validate listing and stock (quantity default 1)
+    const qty = typeof quantity === 'number' && quantity > 0 ? Math.floor(quantity) : 1;
+
+    // Attempt to load a real SaleListing. If it doesn't exist, treat as a mock listing
+    // created from the UI flow and allow order creation with default assumptions.
+    const listing = await prisma.saleListing.findUnique({ where: { id: listingId } }).catch(() => null);
+    if (listing) {
+      const listingWithStock = listing as unknown as { stock?: number; status?: 'ACTIVE' | 'RESERVED' | 'SOLD_OUT' | 'INACTIVE' };
+      if (listingWithStock.status !== 'ACTIVE' && listingWithStock.status !== 'RESERVED') {
+        return NextResponse.json({ error: 'Listing not active' }, { status: 400 });
+      }
+      if ((listingWithStock.stock || 0) < qty) {
+        return NextResponse.json({ error: 'Insufficient stock' }, { status: 400 });
+      }
     }
 
     // Calculate expiry date (72 hours from now)

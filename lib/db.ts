@@ -15,7 +15,12 @@ function resolveDatabaseUrl() {
     // Default to dev.db if not set
     dbUrl = 'file:./prisma/dev.db';
   }
-  
+
+  // Force relative dev.db to live under ./prisma/dev.db (avoid root ./dev.db)
+  if (dbUrl === 'file:./dev.db') {
+    dbUrl = 'file:./prisma/dev.db';
+  }
+
   if (dbUrl && dbUrl.startsWith('file:./')) {
     // Resolve relative to project root
     // In Next.js, process.cwd() should be the project root

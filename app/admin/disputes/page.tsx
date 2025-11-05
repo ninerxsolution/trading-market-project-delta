@@ -4,18 +4,19 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useOrder } from '@/lib/contexts/order-context';
-import { useAuth } from '@/lib/contexts/auth-context';
 import { Order } from '@/lib/types';
-import { CheckCircle, XCircle, AlertTriangle, Eye } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+type ChatMsgApi = { id: string; senderId: string; receiverId: string; message: string; timestamp: string };
+
 export default function AdminDisputesPage() {
-  const { user } = useAuth();
   const { orders, updateOrderStatus } = useOrder();
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [userCache, setUserCache] = useState<Record<string, { id: string; username: string; avatar: string }>>({});
+  const [chatMessages, setChatMessages] = useState<Array<ChatMsgApi>>([]);
 
   useEffect(() => {
     const run = async () => {
@@ -51,76 +52,50 @@ export default function AdminDisputesPage() {
       });
 
       const missingIds = Array.from(userIds).filter(id => !userCache[id]);
-      
-      await Promise.all(missingIds.map(async (id) => {
-        try {
-          const res = await fetch(`/api/users/by-id/${id}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data.user) {
-              setUserCache(prev => ({ ...prev, [id]: { id: data.user.id, username: data.user.username, avatar: data.user.avatar } }));
-            }
-          }
-        } catch {}
-      }));
+      if (missingIds.length === 0) return;
+
+      try {
+        const res = await fetch(`/api/users/by-id?ids=${encodeURIComponent(missingIds.join(','))}`);
+        if (res.ok) {
+          const data = await res.json();
+          const users = Array.isArray(data.users) ? data.users : [];
+          setUserCache(prev => {
+            const next = { ...prev };
+            users.forEach((u: { id: string; username: string; avatar: string }) => {
+              next[u.id] = { id: u.id, username: u.username, avatar: u.avatar };
+            });
+            return next;
+          });
+        }
+      } catch {}
     };
     if (orders.length > 0) {
       loadUsers();
     }
-  }, [orders]);
+  }, [orders, userCache]);
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (forbidden) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <p className="text-xl text-red-500">403 — Admins only</p>
-        <Link className="text-primary underline" href="/">Go home</Link>
-      </div>
-    );
-  }
+  const blocked = loading || forbidden;
 
   const disputeOrders = orders.filter(o => o.status === 'DISPUTE');
   const seller = selectedOrder ? userCache[selectedOrder.sellerId] : null;
   const buyer = selectedOrder ? userCache[selectedOrder.buyerId] : null;
-  const [chatMessages, setChatMessages] = useState<Array<{ id: string; senderId: string; receiverId: string; message: string; timestamp: string }>>([]);
 
-  // Load chat messages for selected order
+  // Load chat messages for selected order (placed before any early returns)
   useEffect(() => {
     if (!selectedOrder) {
-      setChatMessages([]);
+      // Defer clearing to avoid sync setState inside effect body
+      setTimeout(() => setChatMessages([]), 0);
       return;
     }
 
     const loadMessages = async () => {
       try {
-        // Try to load messages between seller and buyer
-        const res = await fetch(`/api/inbox/${selectedOrder.sellerId}`, { credentials: 'include' });
+        const url = `/api/inbox/pair?sellerId=${encodeURIComponent(selectedOrder.sellerId)}&buyerId=${encodeURIComponent(selectedOrder.buyerId)}`;
+        const res = await fetch(url, { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
-          // Filter messages that involve both parties
-          const relevantMessages = (data.messages || []).filter((msg: any) => 
-            (msg.senderId === selectedOrder.sellerId && msg.receiverId === selectedOrder.buyerId) ||
-            (msg.senderId === selectedOrder.buyerId && msg.receiverId === selectedOrder.sellerId)
-          );
+          const relevantMessages = Array.isArray(data.messages) ? data.messages as ChatMsgApi[] : [];
           setChatMessages(relevantMessages);
-        } else {
-          // Try the other direction
-          const res2 = await fetch(`/api/inbox/${selectedOrder.buyerId}`, { credentials: 'include' });
-          if (res2.ok) {
-            const data2 = await res2.json();
-            const relevantMessages = (data2.messages || []).filter((msg: any) => 
-              (msg.senderId === selectedOrder.sellerId && msg.receiverId === selectedOrder.buyerId) ||
-              (msg.senderId === selectedOrder.buyerId && msg.receiverId === selectedOrder.sellerId)
-            );
-            setChatMessages(relevantMessages);
-          }
         }
       } catch {
         setChatMessages([]);
@@ -145,13 +120,24 @@ export default function AdminDisputesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Dispute Resolution</h1>
-          <p className="text-muted-foreground">Review and resolve order disputes</p>
-        </div>
-        <Link href="/admin" className="text-primary underline">Back to Admin</Link>
-      </div>
+      {blocked ? (
+        forbidden ? (
+          <div className="text-center">
+            <p className="text-xl text-red-500">403 — Admins only</p>
+            <Link className="text-primary underline" href="/">Go home</Link>
+          </div>
+        ) : (
+          <p>Loading...</p>
+        )
+      ) : (
+        <>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Dispute Resolution</h1>
+              <p className="text-muted-foreground">Review and resolve order disputes</p>
+            </div>
+            <Link href="/admin" className="text-primary underline">Back to Admin</Link>
+          </div>
 
       {disputeOrders.length === 0 ? (
         <div className="rounded-xl border border-border p-8 text-center">
@@ -245,6 +231,7 @@ export default function AdminDisputesPage() {
                             src={seller.avatar}
                             alt={seller.username}
                             fill
+                            sizes="40px"
                             className="object-cover"
                             unoptimized
                           />
@@ -264,6 +251,7 @@ export default function AdminDisputesPage() {
                             src={buyer.avatar}
                             alt={buyer.username}
                             fill
+                            sizes="40px"
                             className="object-cover"
                             unoptimized
                           />
@@ -298,6 +286,7 @@ export default function AdminDisputesPage() {
                                 src={proof}
                                 alt={`Proof ${idx + 1}`}
                                 fill
+                                sizes="(max-width: 1024px) 100vw, 50vw"
                                 className="object-cover"
                                 unoptimized
                               />
@@ -375,6 +364,8 @@ export default function AdminDisputesPage() {
             </div>
           )}
         </div>
+        )}
+        </>
       )}
     </div>
   );

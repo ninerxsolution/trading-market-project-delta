@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
-// POST /api/sale-listings - create a sale listing (one item, price, description)
+// POST /api/sale-listings - create a sale listing (item, price, description, stock)
 export async function POST(request: NextRequest) {
 	try {
 		const cookie = request.headers.get('cookie') || '';
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const { itemId, price, description, image } = await request.json();
+		const { itemId, price, description, image, stock } = await request.json();
 		if (!itemId || typeof price !== 'number' || price <= 0 || !description) {
 			return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
 		}
@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: 'Item not found' }, { status: 400 });
 		}
 
+		const initialStock = typeof stock === 'number' && stock > 0 ? Math.floor(stock) : 1;
 		const listing = await prisma.saleListing.create({
 			data: {
 				userId: sessionData.user.id,
@@ -28,6 +29,8 @@ export async function POST(request: NextRequest) {
 				price,
 				description,
 				image: image || null,
+				stock: initialStock,
+				status: initialStock > 0 ? 'ACTIVE' : 'INACTIVE',
 			},
 		});
 

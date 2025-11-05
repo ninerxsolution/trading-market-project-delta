@@ -42,6 +42,7 @@ export interface ChatMessage {
   senderId: string;
   receiverId: string;
   message: string;
+  orderId?: string | null;
   timestamp: string;
 }
 
@@ -68,6 +69,7 @@ export interface Order {
   sellerId: string;
   buyerId: string;
   price: number;
+  quantity?: number;
   status: OrderStatus;
   proofImages: string[];
   createdAt: string;
