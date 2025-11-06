@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { X, Minimize2, Maximize2, MessageCircle, Send } from 'lucide-react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -18,7 +18,16 @@ export function ChatBar() {
   const { getOrderByChat, updateOrderStatus, addProofImage, orders, getOrdersForUser, refreshOrders } = useOrder();
   const [expandedChat, setExpandedChat] = useState<string | null>(null);
   const [messageInputs, setMessageInputs] = useState<Record<string, string>>({});
+  const [hasMore, setHasMore] = useState<Record<string, boolean>>({});
+  const [offset, setOffset] = useState<Record<string, number>>({});
+  const [loadingMore, setLoadingMore] = useState<Record<string, boolean>>({});
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState<Record<string, boolean>>({});
   const messageEndRefs = useRef<Record<string, HTMLDivElement>>({});
+  const messageContainerRefs = useRef<Record<string, HTMLDivElement>>({});
+  const messageTopRefs = useRef<Record<string, HTMLDivElement>>({});
+  const isScrollingRef = useRef<Record<string, boolean>>({});
+  const lastLoadTimeRef = useRef<Record<string, number>>({});
+  const observerRefs = useRef<Record<string, IntersectionObserver>>({});
   const prevChatsLength = useRef(0);
 
   // Auto-expand newly created chats and load history
@@ -30,8 +39,14 @@ export function ChatBar() {
         setExpandedChat(newChat.id);
         const other = newChat.participants.find(id => id !== user?.id);
         if (other) {
-          // Load history for the newly opened chat
-          loadHistory(other);
+          // Load history for the newly opened chat - load latest 10 messages
+          setShouldScrollToBottom(prev => ({ ...prev, [newChat.id]: true }));
+          loadHistory(other, 10, 0).then(result => {
+            if (result) {
+              setHasMore(prev => ({ ...prev, [newChat.id]: result.hasMore }));
+              setOffset(prev => ({ ...prev, [newChat.id]: 0 }));
+            }
+          });
         }
       }
     }
@@ -50,9 +65,78 @@ export function ChatBar() {
     
     if ((chat.messages?.length || 0) === 0) {
       const other = chat.participants.find(id => id !== user.id);
-      if (other) loadHistory(other);
+      if (other) {
+        setShouldScrollToBottom(prev => ({ ...prev, [chat.id]: true }));
+        loadHistory(other, 10, 0).then(result => {
+          if (result) {
+            setHasMore(prev => ({ ...prev, [chat.id]: result.hasMore }));
+            setOffset(prev => ({ ...prev, [chat.id]: 0 }));
+          }
+        });
+      }
+    } else {
+      // Reset offset when chat is expanded
+      setOffset(prev => ({ ...prev, [chat.id]: 0 }));
     }
   }, [expandedChat, chats, user, refreshOrders, loadHistory]);
+
+  // Load more messages when scrolling to top
+  const loadMoreMessages = useCallback(async (chatId: string, otherUserId: string) => {
+    if (loadingMore[chatId] || !hasMore[chatId]) return;
+    
+    // Prevent loading too frequently (debounce)
+    const now = Date.now();
+    const lastLoad = lastLoadTimeRef.current[chatId] || 0;
+    if (now - lastLoad < 1000) return; // Wait at least 1 second between loads
+    lastLoadTimeRef.current[chatId] = now;
+    
+    // Temporarily disconnect observer to prevent retriggering
+    if (observerRefs.current[chatId]) {
+      observerRefs.current[chatId].disconnect();
+    }
+    
+    setLoadingMore(prev => ({ ...prev, [chatId]: true }));
+    const currentOffset = offset[chatId] || 0;
+    const newOffset = currentOffset + 10;
+    const container = messageContainerRefs.current[chatId];
+    
+    // Save current scroll position and scroll height BEFORE loading
+    const previousScrollTop = container?.scrollTop || 0;
+    const previousScrollHeight = container?.scrollHeight || 0;
+    
+    const result = await loadHistory(otherUserId, 10, newOffset);
+    
+    if (result) {
+      setHasMore(prev => ({ ...prev, [chatId]: result.hasMore }));
+      setOffset(prev => ({ ...prev, [chatId]: newOffset }));
+      
+      // Restore scroll position after messages are added
+      // Use double requestAnimationFrame to ensure DOM is fully updated
+      isScrollingRef.current[chatId] = true;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (container) {
+            const newScrollHeight = container.scrollHeight;
+            const scrollDifference = newScrollHeight - previousScrollHeight;
+            // Set scroll position to maintain the same visual position
+            container.scrollTop = previousScrollTop + scrollDifference;
+            
+            // Reconnect observer after scroll position is restored
+            setTimeout(() => {
+              const topElement = messageTopRefs.current[chatId];
+              if (topElement && observerRefs.current[chatId] && hasMore[chatId]) {
+                observerRefs.current[chatId].observe(topElement);
+              }
+            }, 100);
+          }
+          isScrollingRef.current[chatId] = false;
+          setLoadingMore(prev => ({ ...prev, [chatId]: false }));
+        });
+      });
+    } else {
+      setLoadingMore(prev => ({ ...prev, [chatId]: false }));
+    }
+  }, [loadingMore, hasMore, offset, loadHistory]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -60,17 +144,111 @@ export function ChatBar() {
     
     Object.keys(messageEndRefs.current).forEach(chatId => {
       const ref = messageEndRefs.current[chatId];
-      if (ref) {
-        ref.scrollIntoView({ behavior: 'smooth' });
+      const container = messageContainerRefs.current[chatId];
+      const isLoading = loadingMore[chatId];
+      const isScrolling = isScrollingRef.current[chatId];
+      const currentOffset = offset[chatId] || 0;
+      const chat = chats.find(c => c.id === chatId);
+      const messages = chat?.messages || [];
+      
+      if (ref && container && !isLoading && !isScrolling) {
+        // If offset > 0, it means user has scrolled up to load older messages
+        // Don't auto-scroll in this case
+        if (currentOffset > 0) return;
+        
+        if (shouldScrollToBottom[chatId]) {
+          // Use requestAnimationFrame to ensure DOM is fully rendered
+          if (messages.length > 0) {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                if (container && ref) {
+                  // Scroll to absolute bottom
+                  container.scrollTop = container.scrollHeight;
+                  // Double check to ensure we're at the bottom
+                  setTimeout(() => {
+                    if (container) {
+                      container.scrollTop = container.scrollHeight;
+                    }
+                  }, 0);
+                }
+                setShouldScrollToBottom(prev => ({ ...prev, [chatId]: false }));
+              });
+            });
+          } else {
+            setShouldScrollToBottom(prev => ({ ...prev, [chatId]: false }));
+          }
+        } else {
+          // For new messages, only scroll if user is near bottom
+          const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+          if (isNearBottom) {
+            // Smooth scroll for new messages
+            ref.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
       }
     });
-  }, [chats, user]);
+  }, [chats, user, loadingMore, offset, shouldScrollToBottom]);
+
+  // Use Intersection Observer to detect when user scrolls near top for each chat
+  useEffect(() => {
+    if (!user || chats.length === 0) {
+      // Clean up all observers
+      Object.values(observerRefs.current).forEach(observer => observer.disconnect());
+      observerRefs.current = {};
+      return;
+    }
+
+    chats.forEach(chat => {
+      const container = messageContainerRefs.current[chat.id];
+      const topElement = messageTopRefs.current[chat.id];
+      const otherUserId = chat.participants.find(id => id !== user.id);
+      
+      // Clean up existing observer for this chat
+      if (observerRefs.current[chat.id]) {
+        observerRefs.current[chat.id].disconnect();
+        delete observerRefs.current[chat.id];
+      }
+      
+      if (!container || !topElement || !otherUserId || !hasMore[chat.id]) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            // When top element is visible (user scrolled near top), load more
+            // Only trigger if not loading, not scrolling, and enough time has passed
+            if (entry.isIntersecting && hasMore[chat.id] && !loadingMore[chat.id] && !isScrollingRef.current[chat.id]) {
+              const now = Date.now();
+              const lastLoad = lastLoadTimeRef.current[chat.id] || 0;
+              if (now - lastLoad >= 1000) {
+                loadMoreMessages(chat.id, otherUserId);
+              }
+            }
+          });
+        },
+        {
+          root: container,
+          rootMargin: '300px 0px', // Trigger 300px before reaching top (reduced from 500px)
+          threshold: 0.1,
+        }
+      );
+
+      observerRefs.current[chat.id] = observer;
+      observer.observe(topElement);
+    });
+
+    return () => {
+      Object.values(observerRefs.current).forEach(observer => observer.disconnect());
+      observerRefs.current = {};
+    };
+  }, [chats, user, hasMore, loadingMore, loadMoreMessages]);
 
   const handleSendMessage = (chatId: string, otherUserId: string) => {
     const message = messageInputs[chatId] || '';
     if (message.trim()) {
       sendMessage(otherUserId, message);
       setMessageInputs(prev => ({ ...prev, [chatId]: '' }));
+      // Scroll to bottom after sending
+      setShouldScrollToBottom(prev => ({ ...prev, [chatId]: true }));
     }
   };
 
@@ -220,7 +398,22 @@ export function ChatBar() {
             {/* Chat Messages */}
             {isExpanded && (
               <>
-                <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-muted/30">
+                <div 
+                  ref={(el) => {
+                    if (el) messageContainerRefs.current[chat.id] = el;
+                  }}
+                  className="flex-1 overflow-y-auto p-3 space-y-2 bg-muted/30"
+                >
+                  {loadingMore[chat.id] && (
+                    <div className="text-center py-2">
+                      <p className="text-xs text-muted-foreground">Loading older messages...</p>
+                    </div>
+                  )}
+                  <div 
+                    ref={(el) => {
+                      if (el) messageTopRefs.current[chat.id] = el;
+                    }}
+                  />
                   {messages.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-4">
                       No messages yet. Start the conversation!

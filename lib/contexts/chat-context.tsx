@@ -11,7 +11,7 @@ interface ChatContextType {
   sendMessage: (userId: string, message: string) => void;
   getChat: (userId: string) => Chat | undefined;
   isChatOpen: (userId: string) => boolean;
-  loadHistory: (userId: string) => Promise<void>;
+  loadHistory: (userId: string, limit?: number, offset?: number) => Promise<{ hasMore: boolean } | undefined>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -140,33 +140,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       return [...prev, newChat];
     });
 
-    // Load history from server
+    // Load history from server - load latest 10 messages
     (async () => {
       try {
-        const res = await fetch(`/api/inbox/${userId}`, { credentials: 'include' });
-        if (!res.ok) return;
-        const data = await res.json();
-        const serverMessages: ChatMessage[] = (data.messages || []).map((m: any) => ({
-          id: String(m.id),
-          senderId: m.senderId,
-          receiverId: m.receiverId,
-          message: m.message,
-          timestamp: new Date(m.timestamp).toISOString(),
-        }));
-        setChats(prev => {
-          return prev.map(chat => {
-            const otherUserId = chat.participants.find(id => id !== (user?.id || ''));
-            if (otherUserId !== userId) return chat;
-            if (serverMessages.length === 0) return chat;
-            const last = serverMessages[serverMessages.length - 1];
-            return {
-              ...chat,
-              messages: serverMessages,
-              lastMessage: last.message,
-              lastMessageTime: last.timestamp,
-            };
-          });
-        });
+        await loadHistory(userId, 10, 0);
       } catch {}
     })();
   }, [user]);
@@ -241,10 +218,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     return getChat(userId) !== undefined;
   }, [getChat]);
 
-  const loadHistory = useCallback(async (otherUserId: string) => {
+  const loadHistory = useCallback(async (otherUserId: string, limit: number = 10, offset: number = 0) => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/inbox/${otherUserId}`, { credentials: 'include' });
+      const res = await fetch(`/api/inbox/${otherUserId}?limit=${limit}&offset=${offset}`, { credentials: 'include' });
       if (!res.ok) return;
       const data = await res.json();
       const serverMessages: ChatMessage[] = (data.messages || []).map((m: any) => ({
@@ -259,9 +236,20 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         if (other !== otherUserId) return c;
         if (serverMessages.length === 0) return c;
         const last = serverMessages[serverMessages.length - 1];
-        return { ...c, messages: serverMessages, lastMessage: last.message, lastMessageTime: last.timestamp };
+        // If offset is 0, replace messages. Otherwise, prepend older messages
+        if (offset === 0) {
+          return { ...c, messages: serverMessages, lastMessage: last.message, lastMessageTime: last.timestamp };
+        } else {
+          // Prepend older messages and sort by timestamp
+          const combined = [...serverMessages, ...c.messages]
+            .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+          return { ...c, messages: combined, lastMessage: last.message, lastMessageTime: last.timestamp };
+        }
       }));
-    } catch {}
+      return { hasMore: data.hasMore || false };
+    } catch {
+      return { hasMore: false };
+    }
   }, [user]);
 
   return (
