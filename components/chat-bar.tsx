@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Minimize2, Maximize2, MessageCircle, Send } from 'lucide-react';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useChat } from '@/lib/contexts/chat-context';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { useOrder } from '@/lib/contexts/order-context';
@@ -11,12 +12,12 @@ import { cn, getDisplayName } from '@/lib/utils';
 import { Package, CheckCircle, Upload, AlertCircle } from 'lucide-react';
 
 export function ChatBar() {
+  const pathname = usePathname();
   const { user } = useAuth();
   const { chats, closeChat, sendMessage, getChat, loadHistory } = useChat();
   const { getOrderByChat, updateOrderStatus, addProofImage, orders, getOrdersForUser, refreshOrders } = useOrder();
   const [expandedChat, setExpandedChat] = useState<string | null>(null);
   const [messageInputs, setMessageInputs] = useState<Record<string, string>>({});
-  const [proofImageInputs, setProofImageInputs] = useState<Record<string, string>>({});
   const messageEndRefs = useRef<Record<string, HTMLDivElement>>({});
   const prevChatsLength = useRef(0);
 
@@ -128,6 +129,8 @@ export function ChatBar() {
   }, [expandedChat, user, chats, orders, getOrderByChat, updateOrderStatus]);
 
   // Early return after all hooks
+  // Hide chat bar on inbox page
+  if (pathname === '/inbox') return null;
   if (!user || chats.length === 0) return null;
 
   return (
@@ -326,8 +329,6 @@ export function ChatBar() {
                     console.warn('Order found but user is not seller or buyer:', { order, userId: user.id });
                     return null;
                   }
-                  
-                  const proofInput = proofImageInputs[chat.id] || '';
 
                   // Show different buttons based on order status and user role
                   // Handle RESERVED status (should auto-transition to AWAITING_SELLER_CONFIRM when seller views)
@@ -341,40 +342,20 @@ export function ChatBar() {
                               Order Reserved - Mark as Sent
                             </span>
                           </div>
-                          <div className="space-y-2">
-                            <input
-                              type="text"
-                              value={proofInput}
-                              onChange={(e) =>
-                                setProofImageInputs(prev => ({ ...prev, [chat.id]: e.target.value }))
+                          <button
+                            onClick={async () => {
+                              try {
+                                await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM');
+                              } catch (error) {
+                                console.error('Failed to update order:', error);
+                                alert('Failed to update order. Please try again.');
                               }
-                              placeholder="Attach proof image URL (or mock base64)"
-                              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
-                            />
-                            <button
-                              onClick={async () => {
-                                try {
-                                  if (proofInput.trim()) {
-                                    // Add proof image and update status to AWAITING_BUYER_CONFIRM
-                                    await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM', {
-                                      proofImages: [...order.proofImages, proofInput.trim()],
-                                    });
-                                    setProofImageInputs(prev => ({ ...prev, [chat.id]: '' }));
-                                  } else {
-                                    // Allow marking as sent without proof
-                                    await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM');
-                                  }
-                                } catch (error) {
-                                  console.error('Failed to update order:', error);
-                                  alert('Failed to update order. Please try again.');
-                                }
-                              }}
-                              className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                            >
-                              <Upload className="h-4 w-4" />
-                              Mark as Sent
-                            </button>
-                          </div>
+                            }}
+                            className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Upload className="h-4 w-4" />
+                            Mark as Sent
+                          </button>
                         </div>
                       );
                     } else {
@@ -401,40 +382,20 @@ export function ChatBar() {
                               Mark as Sent
                             </span>
                           </div>
-                          <div className="space-y-2">
-                            <input
-                              type="text"
-                              value={proofInput}
-                              onChange={(e) =>
-                                setProofImageInputs(prev => ({ ...prev, [chat.id]: e.target.value }))
+                          <button
+                            onClick={async () => {
+                              try {
+                                await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM');
+                              } catch (error) {
+                                console.error('Failed to update order:', error);
+                                alert('Failed to update order. Please try again.');
                               }
-                              placeholder="Attach proof image URL (or mock base64)"
-                              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
-                            />
-                            <button
-                              onClick={async () => {
-                                try {
-                                  if (proofInput.trim()) {
-                                    // Add proof image and update status to AWAITING_BUYER_CONFIRM
-                                    await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM', {
-                                      proofImages: [...order.proofImages, proofInput.trim()],
-                                    });
-                                    setProofImageInputs(prev => ({ ...prev, [chat.id]: '' }));
-                                  } else {
-                                    // Allow marking as sent without proof
-                                    await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM');
-                                  }
-                                } catch (error) {
-                                  console.error('Failed to update order:', error);
-                                  alert('Failed to update order. Please try again.');
-                                }
-                              }}
-                              className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                            >
-                              <Upload className="h-4 w-4" />
-                              Mark as Sent
-                            </button>
-                          </div>
+                            }}
+                            className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Upload className="h-4 w-4" />
+                            Mark as Sent
+                          </button>
                         </div>
                       );
                     } else {

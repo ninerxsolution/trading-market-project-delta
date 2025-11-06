@@ -47,7 +47,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
               }
               
               // If message is from current user (sender), we should only replace optimistic messages
-              // Never add it as a new message, because the optimistic message already shows it
+              // But if no optimistic message found, it might be an automatic system message, so add it
               if (m.senderId === user.id) {
                 const messageTime = new Date(m.timestamp).getTime();
                 // Find optimistic message by checking for temporary IDs and matching content/timestamp
@@ -74,10 +74,20 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
                   c.lastMessageTime = newMsg.timestamp;
                   return arr;
                 }
-                // If no optimistic message found, skip adding (sender already has the optimistic message showing)
-                // This prevents duplication when SSE event arrives but optimistic message wasn't found
-                // The optimistic message should always be there when sending, so if it's missing, we skip
-                return prev;
+                // If no optimistic message found, it might be an automatic system message
+                // Check if message already exists to avoid duplicates
+                const messageExists = existingChat.messages.some(msg => msg.id === serverMsgId);
+                if (messageExists) {
+                  return prev;
+                }
+                // Add the automatic system message
+                const arr = [...prev];
+                const c = arr[idx];
+                c.messages = [...c.messages, newMsg]
+                  .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+                c.lastMessage = newMsg.message;
+                c.lastMessageTime = newMsg.timestamp;
+                return arr;
               }
               
               // For incoming messages (from receiver), add normally if not exists

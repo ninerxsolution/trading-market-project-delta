@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
+import { broadcastTo } from '@/lib/realtime';
 import type { Order as PrismaOrder } from '@prisma/client';
 type OrderDto = Omit<PrismaOrder, 'proofImages'> & { proofImages: string[] };
 type PrismaErrorWithCode = { code?: string };
@@ -186,6 +187,26 @@ export async function POST(request: NextRequest) {
       ...order,
       proofImages: order.proofImages ? JSON.parse(order.proofImages) : [],
     };
+
+    // Send automatic message to chat when order is created (RESERVED status)
+    try {
+      const message = await prisma.chatMessage.create({
+        data: {
+          senderId: buyerId,
+          receiverId: sellerId,
+          message: 'Order Reserved - Waiting for seller to mark as sent...',
+          orderId: order.id,
+        },
+      });
+
+      // Broadcast to both participants
+      const payload = { type: 'message', message };
+      try { broadcastTo(sellerId, payload); } catch {}
+      try { broadcastTo(buyerId, payload); } catch {}
+    } catch (error) {
+      // Don't fail order creation if message sending fails
+      console.error('Failed to send automatic message on order creation:', error);
+    }
 
     return NextResponse.json({ success: true, order: orderWithArray });
   } catch (error) {

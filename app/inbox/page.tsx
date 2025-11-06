@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn, getDisplayName } from '@/lib/utils';
 import { useOrder } from '@/lib/contexts/order-context';
-import { Package } from 'lucide-react';
+import { Package, CheckCircle, Upload, AlertCircle } from 'lucide-react';
 
 type Conversation = {
 	otherUser: { id: string; username: string; avatar: string; merchantName?: string | null };
@@ -14,13 +14,15 @@ type Conversation = {
 };
 
 export default function InboxPage() {
-    const { getOrderByChat } = useOrder();
+    const { getOrderByChat, updateOrderStatus } = useOrder();
 	const [loading, setLoading] = useState(true);
 	const [conversations, setConversations] = useState<Conversation[]>([]);
 	const [active, setActive] = useState<string | null>(null);
 	const [messages, setMessages] = useState<Array<{ id: string; senderId: string; receiverId: string; message: string; timestamp: string }>>([]);
 	const [input, setInput] = useState('');
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const messagesContainerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		const load = async () => {
@@ -55,15 +57,24 @@ export default function InboxPage() {
 		loadThread();
 	}, [active]);
 
+	// Scroll to bottom when messages change or when active conversation changes
+	useEffect(() => {
+		if (messagesEndRef.current) {
+			messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+		}
+	}, [messages, active]);
+
 	useEffect(() => {
 		const es = new EventSource('/api/inbox/stream');
 		es.addEventListener('message', async (ev) => {
 			try {
 				const data = JSON.parse((ev as MessageEvent).data);
 				if (data?.type === 'message') {
-					// If the message involves current active user, refresh thread
+					// If the message involves current active user or current user, refresh thread
 					const m = data.message as { senderId: string; receiverId: string };
-					if (active && (m.senderId === active || m.receiverId === active)) {
+					if (active && currentUserId && 
+						((m.senderId === active || m.receiverId === active) || 
+						 (m.senderId === currentUserId || m.receiverId === currentUserId))) {
 						const res = await fetch(`/api/inbox/${active}`, { credentials: 'include' });
 						if (res.ok) {
 							const d = await res.json();
@@ -74,7 +85,7 @@ export default function InboxPage() {
 			} catch {}
 		});
 		return () => { es.close(); };
-	}, [active]);
+	}, [active, currentUserId]);
 
 	const activeUser = useMemo(() => conversations.find(c => c.otherUser.id === active)?.otherUser, [conversations, active]);
 
@@ -133,7 +144,7 @@ export default function InboxPage() {
 							<p className="text-muted-foreground">Select a conversation</p>
 						)}
 					</div>
-                    <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
+                    <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
 						{active ? (
 							messages.length === 0 ? (
 								<p className="text-sm text-muted-foreground">No messages</p>
@@ -151,15 +162,47 @@ export default function InboxPage() {
 								})
 							)
 						) : null}
+						<div ref={messagesEndRef} />
 					</div>
-                    {/* Order status banner (mirror ChatBar) */}
+                    {/* Order Action Buttons (mirror ChatBar) */}
                     {(() => {
                         if (!active || !currentUserId) return null;
                         const order = getOrderByChat(active, currentUserId);
                         if (!order) return null;
+                        
                         const isSeller = order.sellerId === currentUserId;
+                        const isBuyer = order.buyerId === currentUserId;
+                        
+                        if (!isSeller && !isBuyer) return null;
+                        
+                        // Handle RESERVED status
                         if (order.status === 'RESERVED') {
-                            if (!isSeller) {
+                            if (isSeller) {
+                                return (
+                                    <div className="p-3 border-t border-border bg-muted/30 space-y-2 flex-shrink-0">
+                                        <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
+                                            <Package className="h-4 w-4 text-blue-600" />
+                                            <span className="text-sm font-semibold text-blue-700">
+                                                Order Reserved - Mark as Sent
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM');
+                                                } catch (error) {
+                                                    console.error('Failed to update order:', error);
+                                                    alert('Failed to update order. Please try again.');
+                                                }
+                                            }}
+                                            className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <Upload className="h-4 w-4" />
+                                            Mark as Sent
+                                        </button>
+                                    </div>
+                                );
+                            } else {
                                 return (
                                     <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
                                         <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
@@ -170,23 +213,162 @@ export default function InboxPage() {
                                         </div>
                                     </div>
                                 );
+                            }
+                        }
+                        
+                        // Handle AWAITING_SELLER_CONFIRM status
+                        if (order.status === 'AWAITING_SELLER_CONFIRM') {
+                            if (isSeller) {
+                                return (
+                                    <div className="p-3 border-t border-border bg-muted/30 space-y-2 flex-shrink-0">
+                                        <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
+                                            <Package className="h-4 w-4 text-blue-600" />
+                                            <span className="text-sm font-semibold text-blue-700">
+                                                Mark as Sent
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    await updateOrderStatus(order.id, 'AWAITING_BUYER_CONFIRM');
+                                                } catch (error) {
+                                                    console.error('Failed to update order:', error);
+                                                    alert('Failed to update order. Please try again.');
+                                                }
+                                            }}
+                                            className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <Upload className="h-4 w-4" />
+                                            Mark as Sent
+                                        </button>
+                                    </div>
+                                );
                             } else {
                                 return (
                                     <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
                                         <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
                                             <Package className="h-4 w-4 text-blue-600" />
                                             <span className="text-sm font-semibold text-blue-700">
-                                                Order Reserved - Mark as Sent (use chat tab to proceed)
+                                                Waiting for seller to mark as sent...
                                             </span>
                                         </div>
                                     </div>
                                 );
                             }
                         }
+                        
+                        // Handle AWAITING_BUYER_CONFIRM status
+                        if (order.status === 'AWAITING_BUYER_CONFIRM') {
+                            if (isBuyer) {
+                                return (
+                                    <div className="p-3 border-t border-border bg-muted/30 space-y-2 flex-shrink-0">
+                                        <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/20 border border-green-500/50">
+                                            <Package className="h-4 w-4 text-green-600" />
+                                            <span className="text-sm font-semibold text-green-700">
+                                                Confirm Received
+                                            </span>
+                                        </div>
+                                        {order.proofImages.length > 0 && (
+                                            <div className="space-y-1">
+                                                <p className="text-xs text-muted-foreground">Proof images:</p>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {order.proofImages.map((proof, idx) => (
+                                                        <div key={idx} className="text-xs p-2 rounded bg-background border border-border">
+                                                            {proof.length > 50 ? `${proof.substring(0, 50)}...` : proof}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    await updateOrderStatus(order.id, 'COMPLETED');
+                                                } catch (error) {
+                                                    console.error('Failed to update order:', error);
+                                                    alert('Failed to update order. Please try again.');
+                                                }
+                                            }}
+                                            className="w-full px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <CheckCircle className="h-4 w-4" />
+                                            Confirm Received
+                                        </button>
+                                    </div>
+                                );
+                            } else {
+                                return (
+                                    <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
+                                        <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/20 border border-green-500/50">
+                                            <Package className="h-4 w-4 text-green-600" />
+                                            <span className="text-sm font-semibold text-green-700">
+                                                Waiting for buyer to confirm receipt...
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            }
+                        }
+                        
+                        // Handle DISPUTE status
+                        if (order.status === 'DISPUTE') {
+                            return (
+                                <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
+                                    <div className="flex items-center gap-2 p-2 rounded-lg bg-red-500/20 border border-red-500/50">
+                                        <AlertCircle className="h-4 w-4 text-red-600" />
+                                        <span className="text-sm font-semibold text-red-700">
+                                            Order in Dispute - Admin review pending
+                                        </span>
+                                    </div>
+                                    {order.disputeReason && (
+                                        <p className="text-xs text-red-600 mt-1">{order.disputeReason}</p>
+                                    )}
+                                </div>
+                            );
+                        }
+                        
+                        // Handle COMPLETED status
+                        if (order.status === 'COMPLETED') {
+                            return (
+                                <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
+                                    <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/20 border border-green-500/50">
+                                        <CheckCircle className="h-4 w-4 text-green-600" />
+                                        <span className="text-sm font-semibold text-green-700">
+                                            Order Completed
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                        }
+                        
+                        // Handle CANCELLED status
+                        if (order.status === 'CANCELLED') {
+                            return (
+                                <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
+                                    <div className="flex items-center gap-2 p-2 rounded-lg bg-gray-500/20 border border-gray-500/50">
+                                        <AlertCircle className="h-4 w-4 text-gray-600" />
+                                        <span className="text-sm font-semibold text-gray-700">
+                                            Order Cancelled
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                        }
+                        
                         return null;
                     })()}
 					<div className="p-3 border-t border-border flex gap-2 flex-shrink-0">
-						<input className="flex-1 border border-border rounded px-2 py-2 text-sm" value={input} onChange={e=>setInput(e.target.value)} placeholder="Type a message..." />
+						<input 
+							className="flex-1 border border-border rounded px-2 py-2 text-sm" 
+							value={input} 
+							onChange={e=>setInput(e.target.value)} 
+							onKeyPress={(e) => {
+								if (e.key === 'Enter' && active && input.trim()) {
+									send();
+								}
+							}}
+							placeholder="Type a message..." 
+						/>
 						<button className="bg-primary text-white rounded px-3" onClick={send} disabled={!active || !input.trim()}>Send</button>
 					</div>
 				</div>

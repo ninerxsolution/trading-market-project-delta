@@ -60,6 +60,24 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
 
   if (!item) return null;
 
+  // Calculate average price from current active market listings
+  const calculateCurrentAveragePrice = () => {
+    const pricesWithStock = sellers
+      .filter(s => typeof s.price === 'number' && s.price > 0 && typeof s.stock === 'number' && s.stock > 0)
+      .map(s => s.price!);
+    
+    if (pricesWithStock.length === 0) {
+      // Fallback to item's average price if no active listings
+      return item.avgSellerPrice ?? item.averagePrice ?? 0;
+    }
+    
+    // Calculate average of all active listing prices
+    const sum = pricesWithStock.reduce((a, b) => a + b, 0);
+    return Math.round(sum / pricesWithStock.length);
+  };
+
+  const currentAveragePrice = calculateCurrentAveragePrice();
+
   const handleChatWithOwner = (sellerId: string) => {
     if (user) {
       openChat(sellerId);
@@ -143,7 +161,7 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                   <span className="font-semibold">Average Price</span>
                   <span className="text-2xl font-bold text-primary">
-                    {((item.avgSellerPrice ?? item.averagePrice) ?? 0).toLocaleString()} R$
+                    {currentAveragePrice.toLocaleString()} R$
                   </span>
                 </div>
 

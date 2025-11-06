@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { broadcastTo } from '@/lib/realtime';
 
 // GET /api/orders/[id] - get order by ID
 export async function GET(
@@ -115,6 +116,27 @@ export async function PATCH(
         data: { status: 'AWAITING_BUYER_CONFIRM', proofImages: mergedProofImages ?? order.proofImages, updatedAt: new Date() },
       });
       const dto = { ...updated, proofImages: updated.proofImages ? JSON.parse(updated.proofImages) : [] };
+      
+      // Send automatic message to chat when seller marks as sent
+      try {
+        const message = await prisma.chatMessage.create({
+          data: {
+            senderId: order.sellerId,
+            receiverId: order.buyerId,
+            message: 'Order has been marked as sent. Please confirm receipt.',
+            orderId: order.id,
+          },
+        });
+
+        // Broadcast to both participants
+        const payload = { type: 'message', message };
+        try { broadcastTo(order.buyerId, payload); } catch {}
+        try { broadcastTo(order.sellerId, payload); } catch {}
+      } catch (error) {
+        // Don't fail order update if message sending fails
+        console.error('Failed to send automatic message on mark as sent:', error);
+      }
+      
       return NextResponse.json({ success: true, order: dto });
     }
 
@@ -166,6 +188,27 @@ export async function PATCH(
       });
 
       const dto = { ...result, proofImages: result.proofImages ? JSON.parse(result.proofImages) : [] };
+      
+      // Send automatic message to chat when buyer confirms receipt
+      try {
+        const message = await prisma.chatMessage.create({
+          data: {
+            senderId: order.buyerId,
+            receiverId: order.sellerId,
+            message: 'Order confirmed and completed. Thank you for the trade!',
+            orderId: order.id,
+          },
+        });
+
+        // Broadcast to both participants
+        const payload = { type: 'message', message };
+        try { broadcastTo(order.sellerId, payload); } catch {}
+        try { broadcastTo(order.buyerId, payload); } catch {}
+      } catch (error) {
+        // Don't fail order update if message sending fails
+        console.error('Failed to send automatic message on order completion:', error);
+      }
+      
       return NextResponse.json({ success: true, order: dto });
     }
 

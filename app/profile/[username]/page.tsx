@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { MessageCircle, Calendar, Package, DollarSign, Edit, ArrowLeft, Settings, AlertTriangle } from 'lucide-react';
+import { MessageCircle, Calendar, Package, DollarSign, Edit, ArrowLeft, Settings, AlertTriangle, History, User as UserIcon } from 'lucide-react';
 import { useData } from '@/lib/contexts/data-context';
 import { useChat } from '@/lib/contexts/chat-context';
 import { useAuth } from '@/lib/contexts/auth-context';
@@ -22,6 +22,7 @@ export default function ProfilePage() {
 	const [userTradePosts, setUserTradePosts] = useState<TradePost[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [sales, setSales] = useState<{ listings: Array<{ id: string; price: number; description: string; image: string; createdAt: string; stock?: number; status?: string; tags?: string[]; item: { id: string; name: string; image: string; rarity: string; type?: string } }>; summary: { count: number; total: number } } | null>(null);
+	const [salesHistory, setSalesHistory] = useState<{ sales: Array<{ id: string; item: { id: string; name: string; image: string; rarity: string; type: string } | null; buyer: { id: string; username: string; avatar: string } | null; price: number; quantity: number; totalPrice: number; completedAt: string; createdAt: string }>; summary: { count: number; total: number } } | null>(null);
 	const [editingListing, setEditingListing] = useState<{ id: string; price: number; description: string; image: string; createdAt: string; stock?: number; status?: string; tags?: string[]; item: { id: string; name: string; image: string; rarity: string; type?: string } } | null>(null);
 	const [showReportModal, setShowReportModal] = useState(false);
 
@@ -78,6 +79,25 @@ export default function ProfilePage() {
 			}
 		};
 		loadSales();
+	}, [profileUser]);
+
+	// Load sales history when profileUser known
+	useEffect(() => {
+		const loadSalesHistory = async () => {
+			if (!profileUser) return;
+			try {
+				const hres = await fetch(`/api/users/${encodeURIComponent(profileUser.username)}/sales-history`);
+				if (hres.ok) {
+					const hdata = await hres.json();
+					setSalesHistory(hdata);
+				} else {
+					setSalesHistory({ sales: [], summary: { count: 0, total: 0 } });
+				}
+			} catch {
+				setSalesHistory({ sales: [], summary: { count: 0, total: 0 } });
+			}
+		};
+		loadSalesHistory();
 	}, [profileUser]);
 
 	if (loading) {
@@ -304,6 +324,124 @@ export default function ProfilePage() {
 									Edit
 								</button>
 							)}
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+
+		{/* Sales History */}
+		<div className="mt-8">
+			<h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+				<History className="h-6 w-6" />
+				ประวัติการขาย
+			</h2>
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+				<div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+					<Package className="h-5 w-5" />
+					<div>
+						<p className="text-sm text-muted-foreground">จำนวนรายการที่ขาย</p>
+						<p className="text-xl font-bold">{salesHistory?.summary?.count ?? 0}</p>
+					</div>
+				</div>
+				<div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+					<DollarSign className="h-5 w-5" />
+					<div>
+						<p className="text-sm text-muted-foreground">ยอดขายรวม</p>
+						<p className="text-xl font-bold">{(salesHistory?.summary?.total ?? 0).toLocaleString()} R$</p>
+					</div>
+				</div>
+			</div>
+
+			{!salesHistory || salesHistory.sales.length === 0 ? (
+				<div className="text-center py-8 bg-card rounded-xl border border-border text-muted-foreground">
+					ยังไม่มีประวัติการขาย
+				</div>
+			) : (
+				<div className="space-y-4">
+					{salesHistory.sales.map((sale) => (
+						<div key={sale.id} className="bg-card rounded-xl border border-border p-4">
+							<div className="flex flex-col md:flex-row gap-4">
+								{/* Item Image */}
+								{sale.item && (
+									<div className="relative w-24 h-24 rounded-lg overflow-hidden bg-muted shrink-0">
+										<Image
+											src={sale.item.image}
+											alt={sale.item.name}
+											fill
+											className="object-cover"
+											unoptimized
+										/>
+									</div>
+								)}
+
+								{/* Item Details */}
+								<div className="flex-1 min-w-0">
+									<div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-2">
+										<div>
+											<h3 className="text-lg font-semibold mb-1">
+												{sale.item ? sale.item.name : 'Unknown Item'}
+											</h3>
+											<div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+												<span className="flex items-center gap-1">
+													<DollarSign className="h-4 w-4" />
+													ราคาต่อชิ้น: {sale.price.toLocaleString()} R$
+												</span>
+												{sale.quantity > 1 && (
+													<span className="flex items-center gap-1">
+														<Package className="h-4 w-4" />
+														จำนวน: {sale.quantity} ชิ้น
+													</span>
+												)}
+											</div>
+										</div>
+										<div className="text-right">
+											<p className="text-xl font-bold text-primary">
+												{sale.totalPrice.toLocaleString()} R$
+											</p>
+											<p className="text-xs text-muted-foreground mt-1">
+												รวมทั้งหมด
+											</p>
+										</div>
+									</div>
+
+									{/* Buyer Info */}
+									{sale.buyer && (
+										<div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+											<div className="relative w-8 h-8 rounded-full overflow-hidden bg-primary/20 shrink-0">
+												<Image
+													src={sale.buyer.avatar}
+													alt={sale.buyer.username}
+													fill
+													className="object-cover"
+													unoptimized
+												/>
+											</div>
+											<div className="flex-1 min-w-0">
+												<p className="text-sm text-muted-foreground">ขายให้</p>
+												<Link
+													href={`/profile/${encodeURIComponent(sale.buyer.username)}`}
+													className="text-sm font-semibold hover:text-primary transition-colors"
+												>
+													{sale.buyer.username}
+												</Link>
+											</div>
+										</div>
+									)}
+
+									{/* Date Info */}
+									<div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+										<Calendar className="h-3 w-3" />
+										<span>ขายเมื่อ: {new Date(sale.completedAt).toLocaleString('th-TH', {
+											year: 'numeric',
+											month: 'long',
+											day: 'numeric',
+											hour: '2-digit',
+											minute: '2-digit',
+										})}</span>
+									</div>
+								</div>
+							</div>
 						</div>
 					))}
 				</div>
