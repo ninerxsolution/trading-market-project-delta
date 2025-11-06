@@ -3,14 +3,14 @@
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { MessageCircle, Calendar, Package, DollarSign } from 'lucide-react';
+import { MessageCircle, Calendar, Package, DollarSign, Edit, ArrowLeft } from 'lucide-react';
 import { useData } from '@/lib/contexts/data-context';
 import { useChat } from '@/lib/contexts/chat-context';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { User, TradePost, Item } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { EditListingModal } from '@/components/edit-listing-modal';
 
 export default function ProfilePage() {
 	const params = useParams();
@@ -20,7 +20,8 @@ export default function ProfilePage() {
 	const [profileUser, setProfileUser] = useState<User | null>(null);
 	const [userTradePosts, setUserTradePosts] = useState<TradePost[]>([]);
 	const [loading, setLoading] = useState(true);
-const [sales, setSales] = useState<{ listings: Array<{ id: string; price: number; description: string; image: string; createdAt: string; stock?: number; status?: string; item: { id: string; name: string; image: string; rarity: string } }>; summary: { count: number; total: number } } | null>(null);
+	const [sales, setSales] = useState<{ listings: Array<{ id: string; price: number; description: string; image: string; createdAt: string; stock?: number; status?: string; item: { id: string; name: string; image: string; rarity: string } }>; summary: { count: number; total: number } } | null>(null);
+	const [editingListing, setEditingListing] = useState<{ id: string; price: number; description: string; image: string; createdAt: string; stock?: number; status?: string; item: { id: string; name: string; image: string; rarity: string } } | null>(null);
 
 	useEffect(() => {
 		let isCancelled = false;
@@ -106,6 +107,42 @@ const [sales, setSales] = useState<{ listings: Array<{ id: string; price: number
 			setTimeout(() => {
 				window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 			}, 200);
+		}
+	};
+
+	const handleSaveListing = async (listingId: string, updates: { price?: number; stock?: number }) => {
+		try {
+			const res = await fetch(`/api/sale-listings/${encodeURIComponent(listingId)}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
+				body: JSON.stringify(updates),
+			});
+			if (res.ok) {
+				const data = await res.json();
+				setSales(prev => prev ? {
+					...prev,
+					listings: prev.listings.map(x => x.id === listingId ? {
+						...x,
+						stock: data.listing.stock,
+						status: data.listing.status,
+						price: data.listing.price
+					} : x)
+				} : prev);
+				// Update editingListing state if it's the same listing
+				if (editingListing && editingListing.id === listingId) {
+					setEditingListing({
+						...editingListing,
+						price: data.listing.price,
+						stock: data.listing.stock,
+						status: data.listing.status
+					});
+				}
+			} else {
+				throw new Error('Failed to update listing');
+			}
+		} catch (err) {
+			throw err;
 		}
 	};
 
@@ -207,55 +244,17 @@ const [sales, setSales] = useState<{ listings: Array<{ id: string; price: number
 								<p className="text-xs text-muted-foreground">{new Date(l.createdAt).toLocaleDateString()}</p>
 							</div>
 							{currentUser && profileUser && currentUser.id === profileUser.id && l.id && !String(l.id).startsWith('price-') && (
-								<div className="flex flex-col items-end gap-2">
-									<button
-										onClick={async () => {
-											try {
-												const res = await fetch(`/api/sale-listings/${encodeURIComponent(l.id)}`, {
-													method: 'PATCH',
-													headers: { 'Content-Type': 'application/json' },
-													credentials: 'include',
-													body: JSON.stringify({ stock: (l.stock ?? 0) + 1 }),
-												});
-												if (res.ok) {
-													const data = await res.json();
-													setSales(prev => prev ? { ...prev, listings: prev.listings.map(x => x.id === l.id ? { ...x, stock: data.listing.stock, status: data.listing.status, price: data.listing.price } : x) } : prev);
-												}
-											} catch {}
-										}}
-										className={cn(
-											"px-3 py-2 rounded-lg text-sm font-semibold",
-											"bg-secondary hover:bg-secondary/80"
-										)}
-									>
-										+ Add Stock
-									</button>
-									<button
-										onClick={async () => {
-											const input = prompt('New price', String(l.price));
-											const newPrice = input ? Number(input) : NaN;
-											if (!Number.isFinite(newPrice) || newPrice <= 0) return;
-											try {
-												const res = await fetch(`/api/sale-listings/${encodeURIComponent(l.id)}`, {
-													method: 'PATCH',
-													headers: { 'Content-Type': 'application/json' },
-													credentials: 'include',
-													body: JSON.stringify({ price: Math.floor(newPrice) }),
-												});
-												if (res.ok) {
-													const data = await res.json();
-													setSales(prev => prev ? { ...prev, listings: prev.listings.map(x => x.id === l.id ? { ...x, price: data.listing.price } : x) } : prev);
-												}
-											} catch {}
-										}}
-										className={cn(
-											"px-3 py-2 rounded-lg text-sm font-semibold",
-											"bg-primary text-primary-foreground hover:bg-primary/90"
-										)}
-									>
-										Edit Price
-									</button>
-								</div>
+								<button
+									onClick={() => setEditingListing(l)}
+									className={cn(
+										"flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold",
+										"bg-primary text-primary-foreground hover:bg-primary/90",
+										"transition-colors"
+									)}
+								>
+									<Edit className="h-4 w-4" />
+									Edit
+								</button>
 							)}
 						</div>
 					))}
@@ -263,7 +262,11 @@ const [sales, setSales] = useState<{ listings: Array<{ id: string; price: number
 			)}
 		</div>
 
-			
+			<EditListingModal
+				listing={editingListing}
+				onClose={() => setEditingListing(null)}
+				onSave={handleSaveListing}
+			/>
 		</div>
 	);
 }
