@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { MessageCircle, Calendar, Package, DollarSign, Edit, ArrowLeft } from 'lucide-react';
+import { MessageCircle, Calendar, Package, DollarSign, Edit, ArrowLeft, Settings } from 'lucide-react';
 import { useData } from '@/lib/contexts/data-context';
 import { useChat } from '@/lib/contexts/chat-context';
 import { useAuth } from '@/lib/contexts/auth-context';
@@ -184,19 +184,34 @@ export default function ProfilePage() {
 								</div>
 							</div>
 
-							{currentUser && currentUser.id !== profileUser.id && (
-								<button
-									onClick={handleMessage}
-									className={cn(
-										"flex items-center gap-2 px-6 py-3 rounded-xl font-semibold",
-										"bg-primary text-primary-foreground hover:bg-primary/90",
-										"transition-colors"
-									)}
-								>
-									<MessageCircle className="h-5 w-5" />
-									Message
-								</button>
-							)}
+							<div className="flex items-center gap-3">
+								{currentUser && currentUser.id === profileUser.id && (
+									<Link
+										href={`/profile/${encodeURIComponent(username)}/settings`}
+										className={cn(
+											"flex items-center gap-2 px-6 py-3 rounded-xl font-semibold",
+											"bg-secondary text-secondary-foreground hover:bg-secondary/80",
+											"transition-colors"
+										)}
+									>
+										<Settings className="h-5 w-5" />
+										Settings
+									</Link>
+								)}
+								{currentUser && currentUser.id !== profileUser.id && (
+									<button
+										onClick={handleMessage}
+										className={cn(
+											"flex items-center gap-2 px-6 py-3 rounded-xl font-semibold",
+											"bg-primary text-primary-foreground hover:bg-primary/90",
+											"transition-colors"
+										)}
+									>
+										<MessageCircle className="h-5 w-5" />
+										Message
+									</button>
+								)}
+							</div>
 						</div>
 
 						<p className="text-muted-foreground">{profileUser.bio}</p>

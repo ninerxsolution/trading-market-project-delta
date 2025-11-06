@@ -17,14 +17,16 @@ enum Role {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  username  String   @unique
-  email     String   @unique
-  avatar    String
-  joinDate  String
-  bio       String
-  password  String?  // For mock login, optional
-  role      Role     @default(USER)
+  id          String   @id @default(cuid())
+  username    String   @unique
+  email       String   @unique
+  avatar      String
+  joinDate    String
+  bio         String
+  merchantName String? // ชื่อพ่อค้า
+  gameName    String?  // ชื่อในเกม
+  password    String?  // For mock login, optional
+  role        Role     @default(USER)
   tradePosts TradePost[]
   saleListings SaleListing[]
   sessions  Session[]

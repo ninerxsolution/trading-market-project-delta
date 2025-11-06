@@ -40,6 +40,8 @@ export async function GET(request: NextRequest) {
       avatar: session.user.avatar,
       joinDate: session.user.joinDate,
       bio: session.user.bio,
+      merchantName: (session.user as any).merchantName || null,
+      gameName: (session.user as any).gameName || null,
       role: (session.user as any).role,
       tradePosts: [],
     };
@@ -87,6 +89,8 @@ export async function POST(request: NextRequest) {
         avatar: session.user.avatar,
         joinDate: session.user.joinDate,
         bio: session.user.bio,
+        merchantName: (session.user as any).merchantName || null,
+        gameName: (session.user as any).gameName || null,
         tradePosts: [],
       },
     });

@@ -8,6 +8,8 @@ export interface User {
   avatar: string;
   joinDate: string;
   bio: string;
+  merchantName?: string | null;
+  gameName?: string | null;
   tradePosts?: string[];
   role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
   reputation?: number;
