@@ -17,6 +17,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ use
       description: l.description,
       image: l.image || l.item.image,
       createdAt: l.createdAt,
+      stock: l.stock,
+      status: l.status,
       item: { id: l.item.id, name: l.item.name, image: l.item.image, rarity: l.item.rarity },
     }));
 
@@ -37,6 +39,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ use
         description: '',
         image: itemMap.get(id)?.image || '',
         createdAt: new Date(),
+        stock: undefined,
+        status: undefined,
         item: { id, name: itemMap.get(id)?.name || 'Item', image: itemMap.get(id)?.image || '', rarity: itemMap.get(id)?.rarity || '' },
       }));
     }

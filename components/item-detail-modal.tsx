@@ -36,7 +36,7 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
   const { openChat } = useChat();
   const { user } = useAuth();
   const { createOrder, getOrdersForListing } = useOrder();
-  const [sellers, setSellers] = React.useState<Array<{ id: string; username: string; avatar: string; bio: string; price?: number }>>([]);
+  const [sellers, setSellers] = React.useState<Array<{ id: string; username: string; avatar: string; bio: string; price?: number; stock?: number; listingId?: string }>>([]);
   React.useEffect(() => {
     let ignore = false;
     const load = async () => {
@@ -69,11 +69,11 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
     }
   };
 
-  const handleBuy = async (sellerId: string, sellerPrice?: number) => {
+  const handleBuy = async (sellerId: string, sellerPrice?: number, listingIdFromApi?: string) => {
     if (!user || !item) return;
     
-    // Create a mock listingId
-    const listingId = `listing-${sellerId}-${item.id}`;
+    // Prefer real listing id from API, fallback to mock
+    const listingId = listingIdFromApi || `listing-${sellerId}-${item.id}`;
     const price = sellerPrice || item.averagePrice || item.avgSellerPrice || 0;
     
     // Check if there's already an active order for this listing
@@ -160,7 +160,7 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
             <div className="border-t border-border pt-6">
               <h3 className="text-xl font-bold mb-4">Current Sellers</h3>
               <div className="space-y-2">
-                {sellers.map((seller) => (
+                    {sellers.map((seller) => (
                   <div
                     key={seller.id}
                     className="flex items-center justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
@@ -179,14 +179,15 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
                         <p className="font-semibold">{seller.username}</p>
                         <p className="text-xs text-muted-foreground">{seller.bio}</p>
                         {seller.price ? (
-                          <p className="text-xs font-semibold">{seller.price.toLocaleString()} R$</p>
-                        ) : null}
+                          <p className="text-xs font-semibold">{seller.price.toLocaleString()} R$ {typeof seller.stock === 'number' ? `(Stock: ${seller.stock})` : ''}</p>
+                        ) : (typeof seller.stock === 'number' ? <p className="text-xs text-muted-foreground">Stock: {seller.stock}</p> : null)}
                       </div>
                     </div>
                     {user && user.id !== seller.id && (
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => handleBuy(seller.id, seller.price)}
+                          disabled={typeof seller.stock === 'number' && seller.stock <= 0}
+                          onClick={() => handleBuy(seller.id, seller.price, seller.listingId)}
                           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
                         >
                           <ShoppingCart className="h-4 w-4" />

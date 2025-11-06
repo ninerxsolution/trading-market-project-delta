@@ -14,6 +14,7 @@ export default function PostTradePage() {
   const [itemQuery, setItemQuery] = useState('');
   const [itemId, setItemId] = useState('');
   const [price, setPrice] = useState('');
+  const [stock, setStock] = useState('1');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,7 +46,7 @@ export default function PostTradePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!itemId || !price || Number(price) <= 0 || !description.trim()) {
+    if (!itemId || !price || Number(price) <= 0 || !description.trim() || !stock || Number(stock) < 1) {
       alert('Please fill in all required fields');
       return;
     }
@@ -57,7 +58,7 @@ export default function PostTradePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ itemId, price: Number(price), description }),
+        body: JSON.stringify({ itemId, price: Number(price), description, stock: Number(stock) }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -144,6 +145,25 @@ export default function PostTradePage() {
             id="price"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
+            className={cn(
+              "w-full px-4 py-3 rounded-xl border border-border bg-background",
+              "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
+              "transition-all"
+            )}
+            required
+            min={1}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="stock" className="block text-sm font-semibold mb-2">
+            Stock *
+          </label>
+          <input
+            type="number"
+            id="stock"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
             className={cn(
               "w-full px-4 py-3 rounded-xl border border-border bg-background",
               "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",

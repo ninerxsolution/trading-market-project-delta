@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { useOrder } from '@/lib/contexts/order-context';
+import { Package } from 'lucide-react';
 
 type Conversation = {
 	otherUser: { id: string; username: string; avatar: string };
@@ -12,6 +14,7 @@ type Conversation = {
 };
 
 export default function InboxPage() {
+    const { getOrderByChat } = useOrder();
 	const [loading, setLoading] = useState(true);
 	const [conversations, setConversations] = useState<Conversation[]>([]);
 	const [active, setActive] = useState<string | null>(null);
@@ -117,8 +120,8 @@ export default function InboxPage() {
 						)}
 					</div>
 				</div>
-				<div className="md:col-span-2 rounded-xl border border-border flex flex-col min-h-[60vh]">
-					<div className="p-3 border-b border-border flex items-center gap-2">
+				<div className="md:col-span-2 rounded-xl border border-border flex flex-col max-h-[70vh]">
+					<div className="p-3 border-b border-border flex items-center gap-2 flex-shrink-0">
 						{activeUser ? (
 							<>
 								<div className="relative w-8 h-8 rounded-full overflow-hidden bg-primary/20">
@@ -130,7 +133,7 @@ export default function InboxPage() {
 							<p className="text-muted-foreground">Select a conversation</p>
 						)}
 					</div>
-					<div className="flex-1 overflow-y-auto p-3 space-y-2">
+                    <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
 						{active ? (
 							messages.length === 0 ? (
 								<p className="text-sm text-muted-foreground">No messages</p>
@@ -149,7 +152,40 @@ export default function InboxPage() {
 							)
 						) : null}
 					</div>
-					<div className="p-3 border-t border-border flex gap-2">
+                    {/* Order status banner (mirror ChatBar) */}
+                    {(() => {
+                        if (!active || !currentUserId) return null;
+                        const order = getOrderByChat(active, currentUserId);
+                        if (!order) return null;
+                        const isSeller = order.sellerId === currentUserId;
+                        if (order.status === 'RESERVED') {
+                            if (!isSeller) {
+                                return (
+                                    <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
+                                        <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
+                                            <Package className="h-4 w-4 text-blue-600" />
+                                            <span className="text-sm font-semibold text-blue-700">
+                                                Order Reserved - Waiting for seller to mark as sent...
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            } else {
+                                return (
+                                    <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
+                                        <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
+                                            <Package className="h-4 w-4 text-blue-600" />
+                                            <span className="text-sm font-semibold text-blue-700">
+                                                Order Reserved - Mark as Sent (use chat tab to proceed)
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            }
+                        }
+                        return null;
+                    })()}
+					<div className="p-3 border-t border-border flex gap-2 flex-shrink-0">
 						<input className="flex-1 border border-border rounded px-2 py-2 text-sm" value={input} onChange={e=>setInput(e.target.value)} placeholder="Type a message..." />
 						<button className="bg-primary text-white rounded px-3" onClick={send} disabled={!active || !input.trim()}>Send</button>
 					</div>
