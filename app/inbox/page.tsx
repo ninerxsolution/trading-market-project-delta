@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
+import { cn, getDisplayName } from '@/lib/utils';
 import { useOrder } from '@/lib/contexts/order-context';
 import { Package } from 'lucide-react';
 
 type Conversation = {
-	otherUser: { id: string; username: string; avatar: string };
+	otherUser: { id: string; username: string; avatar: string; merchantName?: string | null };
 	lastMessage: string;
 	lastMessageTime: string;
 };
@@ -112,7 +112,7 @@ export default function InboxPage() {
 										<Image src={c.otherUser.avatar} alt={c.otherUser.username} fill className="object-cover" unoptimized />
 									</div>
 									<div className="min-w-0 flex-1">
-										<p className="font-semibold truncate">{c.otherUser.username}</p>
+										<p className="font-semibold truncate">{getDisplayName(c.otherUser)}</p>
 										<p className="text-xs text-muted-foreground truncate">{c.lastMessage}</p>
 									</div>
 								</button>
@@ -127,7 +127,7 @@ export default function InboxPage() {
 								<div className="relative w-8 h-8 rounded-full overflow-hidden bg-primary/20">
 									<Image src={activeUser.avatar} alt={activeUser.username} fill className="object-cover" unoptimized />
 								</div>
-								<p className="font-semibold">{activeUser.username}</p>
+								<p className="font-semibold">{getDisplayName(activeUser)}</p>
 							</>
 						) : (
 							<p className="text-muted-foreground">Select a conversation</p>

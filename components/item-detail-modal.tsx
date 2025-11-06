@@ -3,7 +3,8 @@
 import React from 'react';
 import { X, MessageCircle, Users } from 'lucide-react';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { cn, getDisplayName } from '@/lib/utils';
 import { useChat } from '@/lib/contexts/chat-context';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { useOrder } from '@/lib/contexts/order-context';
@@ -36,7 +37,7 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
   const { openChat } = useChat();
   const { user } = useAuth();
   const { createOrder, getOrdersForListing } = useOrder();
-  const [sellers, setSellers] = React.useState<Array<{ id: string; username: string; avatar: string; bio: string; price?: number; stock?: number; listingId?: string }>>([]);
+  const [sellers, setSellers] = React.useState<Array<{ id: string; username: string; avatar: string; bio: string; merchantName?: string | null; price?: number; stock?: number; listingId?: string; description?: string; tags?: string[] }>>([]);
   React.useEffect(() => {
     let ignore = false;
     const load = async () => {
@@ -165,8 +166,8 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
                     key={seller.id}
                     className="flex items-center justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-primary/20">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-primary/20 shrink-0">
                         <Image
                           src={seller.avatar}
                           alt={seller.username}
@@ -175,12 +176,36 @@ export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
                           unoptimized
                         />
                       </div>
-                      <div>
-                        <p className="font-semibold">{seller.username}</p>
-                        <p className="text-xs text-muted-foreground">{seller.bio}</p>
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          href={`/profile/${encodeURIComponent(seller.username)}`}
+                          className="font-semibold hover:text-primary transition-colors cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onClose();
+                          }}
+                        >
+                          {getDisplayName(seller)}
+                        </Link>
+                        <p className="text-xs text-muted-foreground truncate">{seller.bio}</p>
+                        {seller.description && seller.description.trim() && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{seller.description}</p>
+                        )}
+                        {seller.tags && seller.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {seller.tags.map((tag, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         {seller.price ? (
-                          <p className="text-xs font-semibold">{seller.price.toLocaleString()} R$ {typeof seller.stock === 'number' ? `(Stock: ${seller.stock})` : ''}</p>
-                        ) : (typeof seller.stock === 'number' ? <p className="text-xs text-muted-foreground">Stock: {seller.stock}</p> : null)}
+                          <p className="text-xs font-semibold mt-1">{seller.price.toLocaleString()} R$ {typeof seller.stock === 'number' ? `(Stock: ${seller.stock})` : ''}</p>
+                        ) : (typeof seller.stock === 'number' ? <p className="text-xs text-muted-foreground mt-1">Stock: {seller.stock}</p> : null)}
                       </div>
                     </div>
                     {user && user.id !== seller.id && (

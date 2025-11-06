@@ -8,6 +8,13 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
         const listings = await prisma.saleListing.findMany({
             where: { itemId: id, status: { in: ['ACTIVE', 'RESERVED'] }, stock: { gt: 0 } },
             orderBy: { updatedAt: 'desc' },
+            include: {
+                tags: {
+                    include: {
+                        tag: true
+                    }
+                }
+            }
         });
 
         if (listings.length > 0) {
@@ -21,9 +28,12 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
                     username: u.username,
                     avatar: u.avatar,
                     bio: u.bio,
+                    merchantName: u.merchantName,
                     price: l.price,
                     stock: l.stock,
                     listingId: l.id,
+                    description: l.description,
+                    tags: l.tags.map(t => t.tag.name),
                 };
             });
             return NextResponse.json({ sellers });
@@ -36,7 +46,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
         const sellerIds = Array.from(latestBySeller.keys());
         if (sellerIds.length === 0) return NextResponse.json({ sellers: [] });
         const users = await prisma.user.findMany({ where: { id: { in: sellerIds } } });
-        const sellers = users.map(u => ({ id: u.id, username: u.username, avatar: u.avatar, bio: u.bio, price: latestBySeller.get(u.id)! }));
+        const sellers = users.map(u => ({ id: u.id, username: u.username, avatar: u.avatar, bio: u.bio, merchantName: u.merchantName, price: latestBySeller.get(u.id)! }));
         return NextResponse.json({ sellers });
     } catch (e) {
         console.error('GET /api/items/[id]/sellers error:', e);

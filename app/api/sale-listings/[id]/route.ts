@@ -21,7 +21,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     }
 
     const body = await request.json();
-    const updates: { price?: number; stock?: number; status?: 'ACTIVE' | 'RESERVED' | 'SOLD_OUT' | 'INACTIVE' } = {};
+    const updates: { price?: number; stock?: number; description?: string; status?: 'ACTIVE' | 'RESERVED' | 'SOLD_OUT' | 'INACTIVE' } = {};
 
     if (typeof body.price === 'number') {
       if (body.price <= 0) return NextResponse.json({ error: 'Invalid price' }, { status: 400 });
@@ -37,13 +37,58 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
         updates.status = 'ACTIVE';
       }
     }
+    if (typeof body.description === 'string') {
+      updates.description = body.description;
+    }
 
-    if (Object.keys(updates).length === 0) {
+    // Handle tags update
+    if (Array.isArray(body.tags)) {
+      // Delete existing tags
+      await prisma.saleListingTag.deleteMany({
+        where: { listingId: id },
+      });
+
+      // Add new tags
+      for (const tagName of body.tags) {
+        if (typeof tagName === 'string' && tagName.trim()) {
+          const tag = await prisma.tag.upsert({
+            where: { name: tagName.trim() },
+            update: {},
+            create: { name: tagName.trim() },
+          });
+
+          await prisma.saleListingTag.create({
+            data: {
+              listingId: id,
+              tagId: tag.id,
+            },
+          }).catch(() => {});
+        }
+      }
+    }
+
+    if (Object.keys(updates).length === 0 && !Array.isArray(body.tags)) {
       return NextResponse.json({ error: 'No changes' }, { status: 400 });
     }
 
-    const updated = await prisma.saleListing.update({ where: { id }, data: updates });
-    return NextResponse.json({ success: true, listing: updated });
+    const updated = await prisma.saleListing.update({ 
+      where: { id }, 
+      data: updates,
+      include: {
+        tags: {
+          include: {
+            tag: true
+          }
+        }
+      }
+    });
+    
+    const result = {
+      ...updated,
+      tags: updated.tags.map(t => t.tag.name),
+    };
+    
+    return NextResponse.json({ success: true, listing: result });
   } catch (e) {
     console.error('PATCH /api/sale-listings/[id] error:', e);
     return NextResponse.json({ error: 'Failed to update listing' }, { status: 500 });

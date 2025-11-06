@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
 				id: c.otherUserId,
 				username: userMap.get(c.otherUserId)?.username || 'Unknown',
 				avatar: userMap.get(c.otherUserId)?.avatar || '',
+				merchantName: userMap.get(c.otherUserId)?.merchantName || null,
 			},
 			lastMessage: c.lastMessage,
 			lastMessageTime: c.lastMessageTime,

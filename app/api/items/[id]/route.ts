@@ -12,7 +12,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 			return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 		}
 		const body = await request.json();
-		const { npcBuyPrice, npcSellPrice, availability, image, name, description, rarity } = body;
+		const { npcBuyPrice, npcSellPrice, availability, image, name, description, rarity, type } = body;
 
 		const updateData: any = {};
 		if (npcBuyPrice !== undefined) updateData.npcBuyPrice = npcBuyPrice;
@@ -22,6 +22,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 		if (name !== undefined) updateData.name = name;
 		if (description !== undefined) updateData.description = description;
 		if (rarity !== undefined) updateData.rarity = rarity;
+		if (type !== undefined) updateData.type = type;
 
 		const updated = await prisma.item.update({
 			where: { id },

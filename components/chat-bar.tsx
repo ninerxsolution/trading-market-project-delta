@@ -7,7 +7,7 @@ import { useChat } from '@/lib/contexts/chat-context';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { useOrder } from '@/lib/contexts/order-context';
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn, getDisplayName } from '@/lib/utils';
 import { Package, CheckCircle, Upload, AlertCircle } from 'lucide-react';
 
 export function ChatBar() {
@@ -73,7 +73,7 @@ export function ChatBar() {
     }
   };
 
-  const [userCache, setUserCache] = useState<Record<string, { id: string; username: string; avatar: string }>>({});
+  const [userCache, setUserCache] = useState<Record<string, { id: string; username: string; avatar: string; merchantName?: string | null }>>({});
 
   useEffect(() => {
     // Preload other users for open chats
@@ -89,7 +89,7 @@ export function ChatBar() {
           if (res.ok) {
             const data = await res.json();
             if (data.user) {
-              setUserCache(prev => ({ ...prev, [id]: { id: data.user.id, username: data.user.username, avatar: data.user.avatar } }));
+              setUserCache(prev => ({ ...prev, [id]: { id: data.user.id, username: data.user.username, avatar: data.user.avatar, merchantName: data.user.merchantName } }));
             }
           }
         } catch {}
@@ -181,7 +181,7 @@ export function ChatBar() {
                 </div>
                 {isExpanded && (
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-sm truncate">{otherUser.username}</p>
+                    <p className="font-semibold text-sm truncate">{getDisplayName(otherUser)}</p>
                     <p className="text-xs text-muted-foreground truncate">
                       {chat.lastMessage || 'New chat'}
                     </p>

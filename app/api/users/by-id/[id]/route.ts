@@ -12,6 +12,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
 				username: user.username,
 				avatar: user.avatar,
 				bio: user.bio,
+				merchantName: user.merchantName,
 			},
 		});
 	} catch (e) {

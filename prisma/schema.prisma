@@ -30,6 +30,8 @@ model User {
   tradePosts TradePost[]
   saleListings SaleListing[]
   sessions  Session[]
+  reportsMade Report[] @relation("ReportedBy")
+  reportsReceived Report[] @relation("ReportedUser")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -40,6 +42,7 @@ model Item {
   image        String
   description String
   rarity      String   // Common, Uncommon, Rare, Epic, Legendary
+  type        ItemType @default(OTHER)
   averagePrice Int
   npcBuyPrice  Int?
   npcSellPrice Int?
@@ -54,6 +57,13 @@ enum NpcAvailability {
   BUYABLE
   TRADE_ONLY
   NOT_AVAILABLE
+}
+
+enum ItemType {
+  WEAPON
+  MEDICINE
+  ATTACHMENT
+  OTHER
 }
 
 model ItemPrice {
@@ -89,8 +99,27 @@ model SaleListing {
   image       String?
   stock       Int      @default(1)
   status      ListingStatus @default(ACTIVE)
+  tags        SaleListingTag[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Tag {
+  id          String   @id @default(cuid())
+  name        String   @unique // e.g. "Modified"
+  createdAt   DateTime @default(now())
+  listings    SaleListingTag[]
+}
+
+model SaleListingTag {
+  id            String   @id @default(cuid())
+  listingId     String
+  tagId         String
+  listing       SaleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  tag           Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@unique([listingId, tagId])
 }
 
 enum ListingStatus {
@@ -154,4 +183,31 @@ model TradeHistory {
   itemId       String
   quantity     Int
   completedAt  DateTime @default(now())
+}
+
+enum ReportType {
+  USER_REPORT
+  SYSTEM_REPORT
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+model Report {
+  id            String       @id @default(cuid())
+  type          ReportType
+  reporterId    String
+  reporter      User         @relation("ReportedBy", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUserId String?     // Only for USER_REPORT
+  reportedUser  User?        @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: SetNull)
+  title         String
+  description   String
+  status        ReportStatus @default(PENDING)
+  adminNotes    String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }

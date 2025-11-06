@@ -9,7 +9,14 @@ export async function GET(request: NextRequest, context: { params: Promise<{ use
     const listings = await prisma.saleListing.findMany({
 			where: { userId: user.id },
 			orderBy: { createdAt: 'desc' },
-			include: { item: true },
+			include: { 
+				item: true,
+				tags: {
+					include: {
+						tag: true
+					}
+				}
+			},
 		});
     let result = listings.map(l => ({
       id: l.id,
@@ -19,7 +26,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ use
       createdAt: l.createdAt,
       stock: l.stock,
       status: l.status,
-      item: { id: l.item.id, name: l.item.name, image: l.item.image, rarity: l.item.rarity },
+      tags: l.tags.map(t => t.tag.name),
+      item: { id: l.item.id, name: l.item.name, image: l.item.image, rarity: l.item.rarity, type: (l.item as any).type || 'OTHER' },
     }));
 
     // Fallback: derive from ItemPrice if no explicit SaleListing found
@@ -41,7 +49,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ use
         createdAt: new Date(),
         stock: undefined,
         status: undefined,
-        item: { id, name: itemMap.get(id)?.name || 'Item', image: itemMap.get(id)?.image || '', rarity: itemMap.get(id)?.rarity || '' },
+        tags: [],
+        item: { id, name: itemMap.get(id)?.name || 'Item', image: itemMap.get(id)?.image || '', rarity: itemMap.get(id)?.rarity || '', type: (itemMap.get(id) as any)?.type || 'OTHER' },
       }));
     }
 

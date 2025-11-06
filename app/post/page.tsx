@@ -10,12 +10,13 @@ import { cn } from '@/lib/utils';
 export default function PostTradePage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [items, setItems] = useState<{ id: string; name: string; rarity: string; image: string }[]>([]);
+  const [items, setItems] = useState<{ id: string; name: string; rarity: string; type: string; image: string }[]>([]);
   const [itemQuery, setItemQuery] = useState('');
   const [itemId, setItemId] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('1');
   const [description, setDescription] = useState('');
+  const [isModified, setIsModified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function PostTradePage() {
         if (res.ok) {
           const data = await res.json();
           setItems(
-            (data.items || []).map((it: any) => ({ id: it.id, name: it.name, rarity: it.rarity, image: it.image }))
+            (data.items || []).map((it: any) => ({ id: it.id, name: it.name, rarity: it.rarity, type: it.type || 'OTHER', image: it.image }))
           );
         }
       } catch {}
@@ -46,19 +47,32 @@ export default function PostTradePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!itemId || !price || Number(price) <= 0 || !description.trim() || !stock || Number(stock) < 1) {
+    if (!itemId || !price || Number(price) <= 0 || !stock || Number(stock) < 1) {
       alert('Please fill in all required fields');
       return;
     }
 
     setIsSubmitting(true);
 
+    // Build tags array (only Modified tag for WEAPON type)
+    const tags: string[] = [];
+    const selectedItem = items.find(it => it.id === itemId);
+    if (selectedItem?.type === 'WEAPON' && isModified) {
+      tags.push('Modified');
+    }
+
     try {
       const res = await fetch('/api/sale-listings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ itemId, price: Number(price), description, stock: Number(stock) }),
+        body: JSON.stringify({ 
+          itemId, 
+          price: Number(price), 
+          description: description.trim() || '', 
+          stock: Number(stock),
+          tags 
+        }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -114,7 +128,13 @@ export default function PostTradePage() {
                 <button
                   type="button"
                   key={it.id}
-                  onClick={() => setItemId(it.id)}
+                  onClick={() => {
+                    setItemId(it.id);
+                    // Reset modified tag when changing item (if new item is not WEAPON)
+                    if (it.type !== 'WEAPON') {
+                      setIsModified(false);
+                    }
+                  }}
                   className={cn(
                     "flex items-center gap-3 p-2 rounded-lg border transition-colors text-left",
                     itemId === it.id ? "border-primary bg-primary/10" : "border-border hover:bg-background"
@@ -135,6 +155,30 @@ export default function PostTradePage() {
             <p className="mt-2 text-xs text-muted-foreground">Selected: {items.find(i=>i.id===itemId)?.name}</p>
           )}
         </div>
+
+        {itemId && items.find(i => i.id === itemId)?.type === 'WEAPON' && (
+          <div>
+            <label className="block text-sm font-semibold mb-2">Tags</label>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsModified(!isModified)}
+                className={cn(
+                  "px-4 py-2 rounded-lg border transition-colors",
+                  isModified 
+                    ? "bg-primary text-white border-primary" 
+                    : "bg-background border-border hover:bg-muted"
+                )}
+              >
+                Modified
+              </button>
+              {isModified && (
+                <span className="text-sm text-muted-foreground">This weapon is modified</span>
+              )}
+            </div>
+          </div>
+        )}
+
 
         <div>
           <label htmlFor="price" className="block text-sm font-semibold mb-2">
@@ -176,7 +220,7 @@ export default function PostTradePage() {
 
         <div>
           <label htmlFor="description" className="block text-sm font-semibold mb-2">
-            Description *
+            Description
           </label>
           <textarea
             id="description"
@@ -189,7 +233,6 @@ export default function PostTradePage() {
               "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
               "transition-all resize-none"
             )}
-            required
           />
         </div>
 

@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
 				image: it.image,
 				description: it.description,
 				rarity: it.rarity,
+				type: (it as any).type ?? 'WEAPON',
 				averagePrice: it.averagePrice,
 				avgSellerPrice,
 				npcBuyPrice: (it as any).npcBuyPrice ?? null,
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 		}
 
-		const { name, image, description, rarity, npcBuyPrice, npcSellPrice, availability } = await request.json();
+		const { name, image, description, rarity, type, npcBuyPrice, npcSellPrice, availability } = await request.json();
 		if (!name || !rarity) {
 			return NextResponse.json({ error: 'name and rarity are required' }, { status: 400 });
 		}
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
 				image: image || 'https://via.placeholder.com/200',
 				description: description || '',
 				rarity,
+				type: type || 'WEAPON',
 				averagePrice: 0,
 				npcBuyPrice: npcBuyPrice ?? null,
 				npcSellPrice: npcSellPrice ?? null,

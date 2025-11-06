@@ -5,7 +5,7 @@ import { Search } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { ItemCard } from '@/components/item-card';
 import { ItemDetailModal } from '@/components/item-detail-modal';
-import { cn } from '@/lib/utils';
+import { cn, getDisplayName } from '@/lib/utils';
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -39,7 +39,7 @@ export default function HomePage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">
-          {user ? `Welcome, ${user.username}!` : 'Welcome to Roblox Trade Marketplace'}
+          {user ? `Welcome, ${getDisplayName(user)}!` : 'Welcome to Roblox Trade Marketplace'}
         </h1>
         <p className="text-muted-foreground">
           Browse and trade your favorite Roblox items

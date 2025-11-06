@@ -3,14 +3,15 @@
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { MessageCircle, Calendar, Package, DollarSign, Edit, ArrowLeft, Settings } from 'lucide-react';
+import { MessageCircle, Calendar, Package, DollarSign, Edit, ArrowLeft, Settings, AlertTriangle } from 'lucide-react';
 import { useData } from '@/lib/contexts/data-context';
 import { useChat } from '@/lib/contexts/chat-context';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { User, TradePost, Item } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { cn, getDisplayName } from '@/lib/utils';
 import Link from 'next/link';
 import { EditListingModal } from '@/components/edit-listing-modal';
+import { ReportUserModal } from '@/components/report-user-modal';
 
 export default function ProfilePage() {
 	const params = useParams();
@@ -20,8 +21,9 @@ export default function ProfilePage() {
 	const [profileUser, setProfileUser] = useState<User | null>(null);
 	const [userTradePosts, setUserTradePosts] = useState<TradePost[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [sales, setSales] = useState<{ listings: Array<{ id: string; price: number; description: string; image: string; createdAt: string; stock?: number; status?: string; item: { id: string; name: string; image: string; rarity: string } }>; summary: { count: number; total: number } } | null>(null);
-	const [editingListing, setEditingListing] = useState<{ id: string; price: number; description: string; image: string; createdAt: string; stock?: number; status?: string; item: { id: string; name: string; image: string; rarity: string } } | null>(null);
+	const [sales, setSales] = useState<{ listings: Array<{ id: string; price: number; description: string; image: string; createdAt: string; stock?: number; status?: string; tags?: string[]; item: { id: string; name: string; image: string; rarity: string; type?: string } }>; summary: { count: number; total: number } } | null>(null);
+	const [editingListing, setEditingListing] = useState<{ id: string; price: number; description: string; image: string; createdAt: string; stock?: number; status?: string; tags?: string[]; item: { id: string; name: string; image: string; rarity: string; type?: string } } | null>(null);
+	const [showReportModal, setShowReportModal] = useState(false);
 
 	useEffect(() => {
 		let isCancelled = false;
@@ -110,7 +112,7 @@ export default function ProfilePage() {
 		}
 	};
 
-	const handleSaveListing = async (listingId: string, updates: { price?: number; stock?: number }) => {
+	const handleSaveListing = async (listingId: string, updates: { price?: number; stock?: number; description?: string; tags?: string[] }) => {
 		try {
 			const res = await fetch(`/api/sale-listings/${encodeURIComponent(listingId)}`, {
 				method: 'PATCH',
@@ -124,18 +126,22 @@ export default function ProfilePage() {
 					...prev,
 					listings: prev.listings.map(x => x.id === listingId ? {
 						...x,
-						stock: data.listing.stock,
-						status: data.listing.status,
-						price: data.listing.price
+						stock: data.listing.stock ?? x.stock,
+						status: data.listing.status ?? x.status,
+						price: data.listing.price ?? x.price,
+						description: data.listing.description ?? x.description,
+						tags: data.listing.tags ?? x.tags
 					} : x)
 				} : prev);
 				// Update editingListing state if it's the same listing
 				if (editingListing && editingListing.id === listingId) {
 					setEditingListing({
 						...editingListing,
-						price: data.listing.price,
-						stock: data.listing.stock,
-						status: data.listing.status
+						price: data.listing.price ?? editingListing.price,
+						stock: data.listing.stock ?? editingListing.stock,
+						status: data.listing.status ?? editingListing.status,
+						description: data.listing.description ?? editingListing.description,
+						tags: data.listing.tags ?? editingListing.tags
 					});
 				}
 			} else {
@@ -158,7 +164,7 @@ export default function ProfilePage() {
 
 			<div className="bg-card rounded-2xl border border-border p-6 mb-6">
 				<div className="flex flex-col md:flex-row gap-6">
-					<div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden bg-primary/20 flex-shrink-0">
+					<div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden bg-primary/20 shrink-0">
 						<Image
 							src={profileUser.avatar}
 							alt={profileUser.username}
@@ -171,7 +177,7 @@ export default function ProfilePage() {
 					<div className="flex-1">
 						<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
 							<div>
-								<h1 className="text-3xl font-bold mb-2">{profileUser.username}</h1>
+								<h1 className="text-3xl font-bold mb-2">{getDisplayName(profileUser)}</h1>
 								<div className="flex items-center gap-4 text-sm text-muted-foreground">
 									<div className="flex items-center gap-2">
 										<Calendar className="h-4 w-4" />
@@ -199,17 +205,30 @@ export default function ProfilePage() {
 									</Link>
 								)}
 								{currentUser && currentUser.id !== profileUser.id && (
-									<button
-										onClick={handleMessage}
-										className={cn(
-											"flex items-center gap-2 px-6 py-3 rounded-xl font-semibold",
-											"bg-primary text-primary-foreground hover:bg-primary/90",
-											"transition-colors"
-										)}
-									>
-										<MessageCircle className="h-5 w-5" />
-										Message
-									</button>
+									<>
+										<button
+											onClick={handleMessage}
+											className={cn(
+												"flex items-center gap-2 px-6 py-3 rounded-xl font-semibold",
+												"bg-primary text-primary-foreground hover:bg-primary/90",
+												"transition-colors"
+											)}
+										>
+											<MessageCircle className="h-5 w-5" />
+											Message
+										</button>
+										<button
+											onClick={() => setShowReportModal(true)}
+											className={cn(
+												"flex items-center gap-2 px-6 py-3 rounded-xl font-semibold",
+												"bg-destructive text-destructive-foreground hover:bg-destructive/90",
+												"transition-colors"
+											)}
+										>
+											<AlertTriangle className="h-5 w-5" />
+											รายงาน
+										</button>
+									</>
 								)}
 							</div>
 						</div>
@@ -246,12 +265,26 @@ export default function ProfilePage() {
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					{sales.listings.map((l) => (
 						<div key={l.id} className="bg-card rounded-xl border border-border p-4 flex gap-3">
-							<div className="relative w-20 h-20 rounded overflow-hidden bg-muted flex-shrink-0">
+							<div className="relative w-20 h-20 rounded overflow-hidden bg-muted shrink-0">
 								<Image src={l.image} alt={l.item.name} fill className="object-cover" unoptimized />
 							</div>
 							<div className="min-w-0 flex-1">
 								<p className="font-semibold truncate">{l.item.name}</p>
-								<p className="text-xs text-muted-foreground truncate mb-1">{l.description}</p>
+								<p className="text-xs text-muted-foreground mb-1 line-clamp-2">
+									{l.description && l.description.trim() ? l.description : 'No description'}
+								</p>
+								{l.tags && l.tags.length > 0 && (
+									<div className="flex flex-wrap gap-1 mb-1">
+										{l.tags.map((tag, idx) => (
+											<span
+												key={idx}
+												className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+											>
+												{tag}
+											</span>
+										))}
+									</div>
+								)}
 								<p className="text-sm font-bold">{l.price.toLocaleString()} R$</p>
 								{typeof l.stock === 'number' && (
 									<p className="text-xs text-muted-foreground">Stock: {l.stock}</p>
@@ -282,6 +315,14 @@ export default function ProfilePage() {
 				onClose={() => setEditingListing(null)}
 				onSave={handleSaveListing}
 			/>
+
+			{showReportModal && profileUser && (
+				<ReportUserModal
+					reportedUserId={profileUser.id}
+					reportedUsername={getDisplayName(profileUser)}
+					onClose={() => setShowReportModal(false)}
+				/>
+			)}
 		</div>
 	);
 }

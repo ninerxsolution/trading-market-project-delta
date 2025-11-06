@@ -9,6 +9,7 @@ type ItemRow = {
 	image: string;
 	description: string;
 	rarity: string;
+	type: 'WEAPON' | 'MEDICINE' | 'ATTACHMENT';
 	averagePrice: number;
 	avgSellerPrice: number | null;
 	npcBuyPrice: number | null;
@@ -24,6 +25,7 @@ export default function AdminItemsPage() {
 	const [createName, setCreateName] = useState('');
 	const [createDescription, setCreateDescription] = useState('');
 	const [createRarity, setCreateRarity] = useState('Common');
+	const [createType, setCreateType] = useState<'WEAPON' | 'MEDICINE' | 'ATTACHMENT'>('WEAPON');
 	const [createAvailability, setCreateAvailability] = useState<'BUYABLE' | 'TRADE_ONLY' | 'NOT_AVAILABLE'>('NOT_AVAILABLE');
 	const [createNpcBuyPrice, setCreateNpcBuyPrice] = useState('');
 	const [createNpcSellPrice, setCreateNpcSellPrice] = useState('');
@@ -38,6 +40,7 @@ export default function AdminItemsPage() {
 	const [editName, setEditName] = useState('');
 	const [editDescription, setEditDescription] = useState('');
 	const [editRarity, setEditRarity] = useState('Common');
+	const [editType, setEditType] = useState<'WEAPON' | 'MEDICINE' | 'ATTACHMENT'>('WEAPON');
 	const [editAvailability, setEditAvailability] = useState<'BUYABLE' | 'TRADE_ONLY' | 'NOT_AVAILABLE'>('NOT_AVAILABLE');
 	const [editNpcBuyPrice, setEditNpcBuyPrice] = useState('');
 	const [editNpcSellPrice, setEditNpcSellPrice] = useState('');
@@ -84,6 +87,7 @@ export default function AdminItemsPage() {
 		setCreateName('');
 		setCreateDescription('');
 		setCreateRarity('Common');
+		setCreateType('WEAPON');
 		setCreateAvailability('NOT_AVAILABLE');
 		setCreateNpcBuyPrice('');
 		setCreateNpcSellPrice('');
@@ -97,6 +101,7 @@ export default function AdminItemsPage() {
 		setCreateName('');
 		setCreateDescription('');
 		setCreateRarity('Common');
+		setCreateType('WEAPON');
 		setCreateAvailability('NOT_AVAILABLE');
 		setCreateNpcBuyPrice('');
 		setCreateNpcSellPrice('');
@@ -124,6 +129,7 @@ export default function AdminItemsPage() {
 			name: createName.trim(),
 			description: createDescription.trim() || null,
 			rarity: createRarity,
+			type: createType,
 			availability: createAvailability,
 			npcBuyPrice: createNpcBuyPrice === '' ? undefined : Number(createNpcBuyPrice),
 			npcSellPrice: createNpcSellPrice === '' ? undefined : Number(createNpcSellPrice),
@@ -144,6 +150,7 @@ export default function AdminItemsPage() {
 		setEditName(item.name);
 		setEditDescription(item.description || '');
 		setEditRarity(item.rarity);
+		setEditType(item.type);
 		setEditAvailability(item.availability);
 		setEditNpcBuyPrice(item.npcBuyPrice?.toString() || '');
 		setEditNpcSellPrice(item.npcSellPrice?.toString() || '');
@@ -157,6 +164,7 @@ export default function AdminItemsPage() {
 		setEditName('');
 		setEditDescription('');
 		setEditRarity('Common');
+		setEditType('WEAPON');
 		setEditAvailability('NOT_AVAILABLE');
 		setEditNpcBuyPrice('');
 		setEditNpcSellPrice('');
@@ -185,6 +193,7 @@ export default function AdminItemsPage() {
 			name: editName.trim(),
 			description: editDescription.trim() || null,
 			rarity: editRarity,
+			type: editType,
 			availability: editAvailability,
 			npcBuyPrice: editNpcBuyPrice === '' ? null : Number(editNpcBuyPrice),
 			npcSellPrice: editNpcSellPrice === '' ? null : Number(editNpcSellPrice),
@@ -284,7 +293,7 @@ export default function AdminItemsPage() {
 									placeholder="Item description..."
 								/>
 							</div>
-							<div className="grid grid-cols-2 gap-4">
+							<div className="grid grid-cols-3 gap-4">
 								<div>
 									<label className="text-sm mb-2 block">Rarity</label>
 									<select
@@ -297,6 +306,18 @@ export default function AdminItemsPage() {
 										<option>Rare</option>
 										<option>Epic</option>
 										<option>Legendary</option>
+									</select>
+								</div>
+								<div>
+									<label className="text-sm mb-2 block">Type</label>
+									<select
+										value={createType}
+										onChange={(e) => setCreateType(e.target.value as any)}
+										className="w-full border border-border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+									>
+										<option value="WEAPON">Weapon</option>
+										<option value="MEDICINE">Medicine</option>
+										<option value="ATTACHMENT">Attachment</option>
 									</select>
 								</div>
 								<div>
@@ -428,7 +449,7 @@ export default function AdminItemsPage() {
 									placeholder="Item description..."
 								/>
 							</div>
-							<div className="grid grid-cols-2 gap-4">
+							<div className="grid grid-cols-3 gap-4">
 								<div>
 									<label className="text-sm mb-2 block">Rarity</label>
 									<select
@@ -441,6 +462,18 @@ export default function AdminItemsPage() {
 										<option>Rare</option>
 										<option>Epic</option>
 										<option>Legendary</option>
+									</select>
+								</div>
+								<div>
+									<label className="text-sm mb-2 block">Type</label>
+									<select
+										value={editType}
+										onChange={(e) => setEditType(e.target.value as any)}
+										className="w-full border border-border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+									>
+										<option value="WEAPON">Weapon</option>
+										<option value="MEDICINE">Medicine</option>
+										<option value="ATTACHMENT">Attachment</option>
 									</select>
 								</div>
 								<div>
@@ -641,6 +674,7 @@ export default function AdminItemsPage() {
 							<th className="text-left p-3">Image</th>
 							<th className="text-left p-3">Name</th>
 							<th className="text-left p-3">Rarity</th>
+							<th className="text-left p-3">Type</th>
 							<th className="text-left p-3">Avg (field)</th>
 							<th className="text-left p-3">Avg (sellers)</th>
 							<th className="text-left p-3">NPC Buy</th>
@@ -660,6 +694,7 @@ export default function AdminItemsPage() {
 									<div className="text-muted-foreground line-clamp-1 max-w-[420px]">{it.description || <span className="text-muted-foreground/50 italic">No description</span>}</div>
 								</td>
 								<td className="p-3">{it.rarity}</td>
+								<td className="p-3">{it.type}</td>
 								<td className="p-3">{it.averagePrice}</td>
 								<td className="p-3">{it.avgSellerPrice ?? '-'}</td>
 								<td className="p-3">{it.npcBuyPrice ?? '-'}</td>
