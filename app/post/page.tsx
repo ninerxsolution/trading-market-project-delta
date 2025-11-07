@@ -1,17 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/auth-context';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+
+type ItemType = 'WEAPON' | 'MEDICINE' | 'ATTACHMENT' | 'OTHER' | null;
 
 export default function PostTradePage() {
   const router = useRouter();
   const { user } = useAuth();
   const [items, setItems] = useState<{ id: string; name: string; rarity: string; type: string; image: string }[]>([]);
   const [itemQuery, setItemQuery] = useState('');
+  const [selectedType, setSelectedType] = useState<ItemType>(null);
   const [itemId, setItemId] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('1');
@@ -39,6 +42,30 @@ export default function PostTradePage() {
     };
     loadItems();
   }, []);
+
+  const filteredItems = useMemo(() => {
+    let filtered = items;
+
+    // Filter by type
+    if (selectedType) {
+      filtered = filtered.filter((it) => it.type === selectedType);
+    }
+
+    // Filter by search query
+    if (itemQuery.trim()) {
+      const q = itemQuery.trim().toLowerCase();
+      filtered = filtered.filter((it) => it.name.toLowerCase().includes(q));
+    }
+
+    return filtered;
+  }, [items, itemQuery, selectedType]);
+
+  const itemTypes: { value: ItemType; label: string }[] = [
+    { value: 'WEAPON', label: 'Weapon' },
+    { value: 'MEDICINE', label: 'Medicine' },
+    { value: 'ATTACHMENT', label: 'Attachment' },
+    { value: 'OTHER', label: 'Other' },
+  ];
 
   if (!user) {
     return null;
@@ -90,7 +117,7 @@ export default function PostTradePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="container mx-auto px-4 py-8">
       <Link
         href="/"
         className="inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition-colors"
@@ -117,14 +144,59 @@ export default function PostTradePage() {
               "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             )}
           />
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-72 overflow-y-auto border border-border rounded-xl p-3 bg-muted/20">
-            {items
-              .filter(it => {
-                const q = itemQuery.trim().toLowerCase();
-                if (!q) return true;
-                return it.name.toLowerCase().includes(q);
-              })
-              .map((it) => (
+          
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">Filter by type:</span>
+            <button
+              type="button"
+              onClick={() => setSelectedType(null)}
+              className={cn(
+                "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                "border-2",
+                selectedType === null
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-foreground border-border hover:border-primary/50"
+              )}
+            >
+              All
+            </button>
+            {itemTypes.map((type) => (
+              <button
+                key={type.value}
+                type="button"
+                onClick={() => setSelectedType(type.value)}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                  "border-2",
+                  selectedType === type.value
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-foreground border-border hover:border-primary/50"
+                )}
+              >
+                {type.label}
+              </button>
+            ))}
+            {selectedType && (
+              <button
+                type="button"
+                onClick={() => setSelectedType(null)}
+                className="ml-auto px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                <X className="h-4 w-4" />
+                Clear filter
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 max-h-72 overflow-y-auto border border-border rounded-xl p-3 bg-muted/20">
+            {filteredItems.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                {itemQuery || selectedType
+                  ? `No items found${itemQuery ? ` matching "${itemQuery}"` : ''}${selectedType ? ` with type "${itemTypes.find(t => t.value === selectedType)?.label}"` : ''}`
+                  : 'No items available'}
+              </div>
+            ) : (
+              filteredItems.map((it) => (
                 <button
                   type="button"
                   key={it.id}
@@ -149,7 +221,8 @@ export default function PostTradePage() {
                     <p className="text-xs text-muted-foreground">{it.rarity}</p>
                   </div>
                 </button>
-              ))}
+              ))
+            )}
           </div>
           {itemId && (() => {
             const selectedItem = items.find(i => i.id === itemId);
