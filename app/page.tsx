@@ -64,7 +64,7 @@ export default function HomePage() {
       {filteredItems.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground text-lg">
-            No items found matching "{searchQuery}"
+            No items found matching &quot;{searchQuery}&quot;
           </p>
         </div>
       ) : (

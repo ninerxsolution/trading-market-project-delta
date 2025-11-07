@@ -31,21 +31,21 @@ export function ItemCard({ item, onClick }: ItemCardProps) {
     <button
       onClick={onClick}
       className={cn(
-        "group relative overflow-hidden rounded-2xl bg-card border-2 border-border",
+        "group relative overflow-hidden rounded-2xl bg-card border-2 border-border flex flex-col justify-start",
         "hover:border-primary transition-all duration-300 hover:shadow-lg hover:scale-105",
         "cursor-pointer text-left"
       )}
     >
-      <div className="relative h-48 w-full bg-gradient-to-br from-primary/20 to-secondary/20">
+      <div className="relative min-h-54 min-w-54 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
         <Image
           src={item.image}
           alt={item.name}
           fill
-          className="object-cover"
+          className="object-contain object-center w-full h-full"
           unoptimized
         />
         <div className={cn(
-          "absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-bold text-white",
+          "absolute top-2 left-2 px-3 py-1 rounded-full text-xs font-bold text-white",
           rarityColors[item.rarity]
         )}>
           {item.rarity}

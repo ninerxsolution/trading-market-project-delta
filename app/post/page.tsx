@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/auth-context';
-import { ArrowLeft, Upload } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
@@ -32,7 +32,7 @@ export default function PostTradePage() {
         if (res.ok) {
           const data = await res.json();
           setItems(
-            (data.items || []).map((it: any) => ({ id: it.id, name: it.name, rarity: it.rarity, type: it.type || 'OTHER', image: it.image }))
+            (data.items || []).map((it: { id: string; name: string; rarity: string; type?: string; image: string }) => ({ id: it.id, name: it.name, rarity: it.rarity, type: it.type || 'OTHER', image: it.image }))
           );
         }
       } catch {}
@@ -83,7 +83,7 @@ export default function PostTradePage() {
       setIsSubmitting(false);
       alert('Trade posted successfully!');
       router.push('/');
-    } catch (e) {
+    } catch {
       setIsSubmitting(false);
       alert('Failed to post trade');
     }
@@ -140,7 +140,7 @@ export default function PostTradePage() {
                     itemId === it.id ? "border-primary bg-primary/10" : "border-border hover:bg-background"
                   )}
                 >
-                  <div className="relative w-12 h-12 rounded bg-muted overflow-hidden">
+                  <div className="relative w-12 min-w-12 h-12 min-h-12 rounded bg-muted overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={it.image} alt={it.name} className="object-cover w-full h-full" />
                   </div>
@@ -151,9 +151,36 @@ export default function PostTradePage() {
                 </button>
               ))}
           </div>
-          {itemId && (
-            <p className="mt-2 text-xs text-muted-foreground">Selected: {items.find(i=>i.id===itemId)?.name}</p>
-          )}
+          {itemId && (() => {
+            const selectedItem = items.find(i => i.id === itemId);
+            if (!selectedItem) return null;
+            return (
+              <div className="mt-4 p-4 border border-border rounded-xl bg-muted/30">
+                <p className="text-sm font-semibold mb-3 text-muted-foreground">Selected Item Preview</p>
+                <div className="flex items-center gap-4">
+                  <div className="relative w-20 h-20 rounded-lg bg-muted overflow-hidden shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={selectedItem.image} 
+                      alt={selectedItem.name} 
+                      className="object-cover w-full h-full" 
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-lg mb-1">{selectedItem.name}</h3>
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                      <span className="px-2 py-1 rounded bg-primary/10 text-primary font-medium">
+                        {selectedItem.rarity}
+                      </span>
+                      <span className="px-2 py-1 rounded bg-muted text-muted-foreground">
+                        {selectedItem.type}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {itemId && items.find(i => i.id === itemId)?.type === 'WEAPON' && (
