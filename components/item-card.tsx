@@ -51,14 +51,16 @@ export function ItemCard({ item, onClick }: ItemCardProps) {
           {item.rarity}
         </div>
       </div>
-      
-      <div className="p-4">
-        <h3 className="font-bold text-lg mb-1 group-hover:text-primary transition-colors">
-          {item.name}
-        </h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-          {item.description}
-        </p>
+
+      <div className="p-4 h-full flex flex-col justify-between">
+        <div>
+          <h3 className="font-bold text-lg mb-1 group-hover:text-primary transition-colors">
+            {item.name}
+          </h3>
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+            {item.description}
+          </p>
+        </div>
         <div className="flex items-center justify-between">
           {typeof item.averagePrice === 'number' ? (
             <span className="text-lg font-bold text-primary">
