@@ -1,0 +1,1400 @@
+{
+  "weapons": [
+    {
+      "name": "PKM",
+      "url": "https://project-delta-a.fandom.com/wiki/PKM",
+      "category": "Weapons"
+    },
+    {
+      "name": "Task Force Zero MOD-98 Suppressed",
+      "url": "https://project-delta-a.fandom.com/wiki/Task_Force_Zero_MOD-98_Suppressed",
+      "category": "Weapons"
+    },
+    {
+      "name": "R700",
+      "url": "https://project-delta-a.fandom.com/wiki/Remington_Model_700",
+      "category": "Weapons"
+    },
+    {
+      "name": "AS Val",
+      "url": "https://project-delta-a.fandom.com/wiki/AS_Val",
+      "category": "Weapons"
+    },
+    {
+      "name": "FN-FAL",
+      "url": "https://project-delta-a.fandom.com/wiki/FN-FAL",
+      "category": "Weapons"
+    },
+    {
+      "name": "M4A1",
+      "url": "https://project-delta-a.fandom.com/wiki/M4A1",
+      "category": "Weapons"
+    },
+    {
+      "name": "ADAR 2-15",
+      "url": "https://project-delta-a.fandom.com/wiki/ADAR_2-15",
+      "category": "Weapons"
+    },
+    {
+      "name": "Saiga 12",
+      "url": "https://project-delta-a.fandom.com/wiki/Saiga_12",
+      "category": "Weapons"
+    },
+    {
+      "name": "SVD",
+      "url": "https://project-delta-a.fandom.com/wiki/SVD",
+      "category": "Weapons"
+    },
+    {
+      "name": "AKMN",
+      "url": "https://project-delta-a.fandom.com/wiki/AKMN",
+      "category": "Weapons"
+    },
+    {
+      "name": "MP5SD",
+      "url": "https://project-delta-a.fandom.com/wiki/MP5SD",
+      "category": "Weapons"
+    },
+    {
+      "name": "IZh-81 Pump Shotgun",
+      "url": "https://project-delta-a.fandom.com/wiki/IZh-81_Pump_Shotgun",
+      "category": "Weapons"
+    },
+    {
+      "name": "Mosin-Nagant",
+      "url": "https://project-delta-a.fandom.com/wiki/Mosin-Nagant",
+      "category": "Weapons"
+    },
+    {
+      "name": "SKS",
+      "url": "https://project-delta-a.fandom.com/wiki/SKS",
+      "category": "Weapons"
+    },
+    {
+      "name": "AKM Improvised",
+      "url": "https://project-delta-a.fandom.com/wiki/AKM_Improvised",
+      "category": "Weapons"
+    },
+    {
+      "name": "PPSH-41",
+      "url": "https://project-delta-a.fandom.com/wiki/PPSH-41",
+      "category": "Weapons"
+    },
+    {
+      "name": "IZh-12",
+      "url": "https://project-delta-a.fandom.com/wiki/IZh-12",
+      "category": "Weapons"
+    },
+    {
+      "name": "RPG-7",
+      "url": "https://project-delta-a.fandom.com/wiki/RPG-7",
+      "category": "Weapons"
+    },
+    {
+      "name": "Task Force MOD-0",
+      "url": "https://project-delta-a.fandom.com/wiki/Task_Force_MOD-0",
+      "category": "Weapons"
+    },
+    {
+      "name": "MK23",
+      "url": "https://project-delta-a.fandom.com/wiki/MK23",
+      "category": "Weapons"
+    },
+    {
+      "name": "Škorpion vz. 61",
+      "url": "https://project-delta-a.fandom.com/wiki/%C5%A0korpion_vz._61",
+      "category": "Weapons"
+    },
+    {
+      "name": "MP443 Yarygin Pistol",
+      "url": "https://project-delta-a.fandom.com/wiki/MP443_Yarygin_Pistol",
+      "category": "Weapons"
+    },
+    {
+      "name": "Pistol Makarov",
+      "url": "https://project-delta-a.fandom.com/wiki/Pistol_Makarov",
+      "category": "Weapons"
+    },
+    {
+      "name": "TT-33 Tokarev Pistol",
+      "url": "https://project-delta-a.fandom.com/wiki/TT-33_Tokarev_Pistol",
+      "category": "Weapons"
+    },
+    {
+      "name": "DV-2",
+      "url": "https://project-delta-a.fandom.com/wiki/DV-2",
+      "category": "Weapons"
+    },
+    {
+      "name": "Anarchy Tomahawk",
+      "url": "https://project-delta-a.fandom.com/wiki/Anarchy_Tomahawk",
+      "category": "Weapons"
+    },
+    {
+      "name": "Plasma Ninjato",
+      "url": "https://project-delta-a.fandom.com/wiki/Plasma_Ninjato",
+      "category": "Weapons"
+    },
+    {
+      "name": "Ice Axe",
+      "url": "https://project-delta-a.fandom.com/wiki/Ice_Axe",
+      "category": "Weapons"
+    },
+    {
+      "name": "Ice Dagger",
+      "url": "https://project-delta-a.fandom.com/wiki/Ice_Dagger",
+      "category": "Weapons"
+    },
+    {
+      "name": "Karambit",
+      "url": "https://project-delta-a.fandom.com/wiki/Karambit",
+      "category": "Weapons"
+    },
+    {
+      "name": "Cutlass",
+      "url": "https://project-delta-a.fandom.com/wiki/Cutlass",
+      "category": "Weapons"
+    },
+    {
+      "name": "Longsword",
+      "url": "https://project-delta-a.fandom.com/wiki/Longsword",
+      "category": "Weapons"
+    },
+    {
+      "name": "Scythe",
+      "url": "https://project-delta-a.fandom.com/wiki/Scythe",
+      "category": "Weapons"
+    },
+    {
+      "name": "Machete",
+      "url": "https://project-delta-a.fandom.com/wiki/Machete",
+      "category": "Weapons"
+    },
+    {
+      "name": "RGO",
+      "url": "https://project-delta-a.fandom.com/wiki/RGO",
+      "category": "Weapons"
+    },
+    {
+      "name": "F1",
+      "url": "https://project-delta-a.fandom.com/wiki/F1",
+      "category": "Weapons"
+    },
+    {
+      "name": "RGD-5",
+      "url": "https://project-delta-a.fandom.com/wiki/RGD-5",
+      "category": "Weapons"
+    },
+    {
+      "name": "M84",
+      "url": "https://project-delta-a.fandom.com/wiki/M84",
+      "category": "Weapons"
+    }
+  ],
+  "fronts": [
+    {
+      "name": "Improvised AKM Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/Improvised_AKM_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "AKMN Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/AKMN_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "AKMN Tactical Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/AKMN_Tactical_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "AS VAL Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/AS_Val_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "IZh-81 Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/IZh-81_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "SKS Tactical Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/SKS_Tactical_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "SKS Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/SKS_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "SVD Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/SVD_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "PKM Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/PKM_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "MK12 Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/MK12_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "M4 Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/M4_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "Mosin Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/Mosin_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "Saiga Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/Saiga_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "IZh-12 Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/IZh-12_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "ADAR Front Assembly",
+      "url": "https://project-delta-a.fandom.com/wiki/ADAR_Front_Assembly",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "FN FAL Front Assembl",
+      "url": "https://project-delta-a.fandom.com/wiki/FAL_Front_Assembly",
+      "category": "Weapon Components"
+    }
+  ],
+  "handles": [
+    {
+      "name": "Improvised AKM Handle",
+      "url": "https://project-delta-a.fandom.com/wiki/Improvised_AKM_Handle",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "AKMN Handle",
+      "url": "https://project-delta-a.fandom.com/wiki/AKMN_Handle",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "AS Val Handle",
+      "url": "https://project-delta-a.fandom.com/wiki/AS_Val_Handle",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "RK-3 AK Handle",
+      "url": "https://project-delta-a.fandom.com/wiki/RK-3_AK_Handle",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "M4 Handle",
+      "url": "https://project-delta-a.fandom.com/wiki/M4_Handle",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "FN FAL Handle",
+      "url": "https://project-delta-a.fandom.com/wiki/FN_Fal_Handle",
+      "category": "Weapon Components"
+    }
+  ],
+  "stocks": [
+    {
+      "name": "Improvised AKM Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/Improvised_AKM_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "AKMN Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/AKMN_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "Polymer AKMN Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/Polymer_AKMN_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "PT-1 Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/PT-1_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "IZh-81 Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/IZh-81_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "AS VAL Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/AS_Val_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "Mosin Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/Mosin_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "SKS Tactical Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/SKS_Tactical_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "SKS Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/SKS_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "PKM Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/PKM_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "PPSH-41 Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/PPSH-41_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "SVD Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/SVD_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "MP5 Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/MP5_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "M4 Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/M4_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "MK12 Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/MK12_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "IZh-12 Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/IZh-12_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "ADAR Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/ADAR_2-15_Stock",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "FN FAL Stock",
+      "url": "https://project-delta-a.fandom.com/wiki/FN_FAL_Stock",
+      "category": "Weapon Components"
+    }
+  ],
+  "muzzles": [
+    {
+      "name": "AKM Flash Hider",
+      "url": "https://project-delta-a.fandom.com/wiki/AKM_Flash_Hider",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "AKM Muzzle Brake",
+      "url": "https://project-delta-a.fandom.com/wiki/AKM_Muzzle_Brake",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "SVD Flash Hider",
+      "url": "https://project-delta-a.fandom.com/wiki/SVD_Flash_Hider",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "M4 Flash Hider",
+      "url": "https://project-delta-a.fandom.com/wiki/M4_Flash_Hider",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "PBS-1 Suppressor",
+      "url": "https://project-delta-a.fandom.com/wiki/PBS-1_Rifle_Suppressor",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "SOCOM556-RC2 Suppressor",
+      "url": "https://project-delta-a.fandom.com/wiki/SOCOM556-RC2_Suppressor",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "KAC Pistol Suppressor",
+      "url": "https://project-delta-a.fandom.com/wiki/KAC_Pistol_Suppressor",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "Improvised Oil Can Suppressor",
+      "url": "https://project-delta-a.fandom.com/wiki/Improvised_Oil_Can_Suppressor",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "Pistol Muzzle Brake",
+      "url": "https://project-delta-a.fandom.com/wiki/Pistol_Muzzle_Brake",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "Timberwolf Suppressor",
+      "url": "https://project-delta-a.fandom.com/wiki/Timberwolf_Suppressor",
+      "category": "Weapon Components"
+    }
+  ],
+  "optics": [
+    {
+      "name": "Sniper Scope",
+      "url": "https://project-delta-a.fandom.com/wiki/Sniper_Scope",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "ACOG 4x Scope",
+      "url": "https://project-delta-a.fandom.com/wiki/ACOG_4x_Scope",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "OKP-7 Sight",
+      "url": "https://project-delta-a.fandom.com/wiki/OKP-7",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "T1 Micro Red Dot Sight",
+      "url": "https://project-delta-a.fandom.com/wiki/T1_Micro_Red_Dot_Sight",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "SRO Reflex Optic",
+      "url": "https://project-delta-a.fandom.com/wiki/SRO_Reflex_Optic",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "Holographic Sight",
+      "url": "https://project-delta-a.fandom.com/wiki/Holographic_Sight",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "PN6K-5 Scope",
+      "url": "https://project-delta-a.fandom.com/wiki/PN6K-5_Night_Vision_Optic",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "Mosin Pu 3.5x Scope",
+      "url": "https://project-delta-a.fandom.com/wiki/Pu_3.5x",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "6x Scope",
+      "url": "https://project-delta-a.fandom.com/wiki/6x_Scope",
+      "category": "Weapon Components"
+    }
+  ],
+  "extras": [
+    {
+      "name": "Flashlight \"Firefly\"",
+      "url": "https://project-delta-a.fandom.com/wiki/Flashlight_%22Firefly%22",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "Laser Pointer",
+      "url": "https://project-delta-a.fandom.com/wiki/Laser_Pointer",
+      "category": "Weapon Components"
+    }
+  ],
+  "magazines": [
+    {
+      "name": "7.62x39 AKM 20-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x39_AKM_20-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "7.62x39 AKM 30-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x39_AKM_30-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "7.62x39 AKM 75-Round Drum Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x39_AKM_75-Round_Drum_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "7.62x54R SVD 10-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x54R_SVD_10-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "7.62x25 PPSh-41 35-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x25_PPSh-41_35-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "7.62x25 PPSh-41 71-Round Drum Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x25_PPSh-41_71-Round_Drum_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": ".45ACP MK23 17-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/.45ACP_MK23_17-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "7.62x25 TT-33 Tokarev 8-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x25_TT-33_Tokarev_8-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "9x19 Pistol Yarygin 18-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x19_Pistol_Yarygin_18-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "9x19 MP5SD 30-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x19_MP5SD_30-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "9x19 MP5SD 50-Round Drum Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x19_MP5SD_50-Round_Drum_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "9x18 Pistol Makarov 8-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x18_Pistol_Makarov_8-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "9x18 Pistol Makarov 80-Round Drum Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x18_Pistol_Makarov_80-Round_Drum_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "9x18 Škorpion vz. 61 20-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x18_%C5%A0korpion_vz._61_20-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "9x18 Skorpion vz.61 75- round Drum",
+      "url": "https://project-delta-a.fandom.com/wiki/9x18_vz_75-round_Drum",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "9x39 AS Val 20-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x39_AS_Val_20-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "9x39 AS Val 30-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x39_AS_Val_30-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "5.56x45 M4A1 30-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/5.56x45_M4A1_30-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "5.56x45 M4A1 100-Round Drum Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/5.56x45_M4A1_100-Round_Drum_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "12 Gauge Saiga 12 5-Round Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/12_Gauge_Saiga_12_5-Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "12 Gauge Saiga 12 20-Round Drum Magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/12_Gauge_Saiga_12_20-Round_Drum_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "7.62x51 20 rounds magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x51_20_Round_Magazine",
+      "category": "Weapon Components"
+    },
+    {
+      "name": "Drum magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x18_Pistol_Makarov_80-Round_Drum_Magazine",
+      "category": "Magazines"
+    },
+    {
+      "name": "Normal magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x18_%C5%A0korpion_vz._61_20-Round_Magazine",
+      "category": "Magazines"
+    },
+    {
+      "name": "Normal magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x19_MP5SD_30-Round_Magazine",
+      "category": "Magazines"
+    },
+    {
+      "name": "Drum magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x19_MP5SD_50-Round_Drum_Magazine",
+      "category": "Magazines"
+    },
+    {
+      "name": "Normal magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x25_PPSh-41_35-Round_Magazine",
+      "category": "Magazines"
+    },
+    {
+      "name": "Drum magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x25_PPSh-41_71-Round_Drum_Magazine",
+      "category": "Magazines"
+    },
+    {
+      "name": "Normal magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x39_AKM_30-Round_Magazine",
+      "category": "Magazines"
+    },
+    {
+      "name": "Drum magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x39_AKM_75-Round_Drum_Magazine",
+      "category": "Magazines"
+    },
+    {
+      "name": "Drum magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/5.56x45_M4A1_100-Round_Drum_Magazine",
+      "category": "Magazines"
+    },
+    {
+      "name": "Extended magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/9x39_AS_Val_30-Round_Magazine",
+      "category": "Magazines"
+    },
+    {
+      "name": "Drum magazine",
+      "url": "https://project-delta-a.fandom.com/wiki/12_Gauge_Saiga_12_20-Round_Drum_Magazine",
+      "category": "Magazines"
+    }
+  ],
+  "helmets": [
+    {
+      "name": "Motorcycle Helmet",
+      "url": "https://project-delta-a.fandom.com/wiki/Motorcycle_Helmet",
+      "category": "Helmets"
+    },
+    {
+      "name": "Head Mount",
+      "url": "https://project-delta-a.fandom.com/wiki/Head_Mount",
+      "category": "Helmets"
+    },
+    {
+      "name": "SSH-68 Helmet",
+      "url": "https://project-delta-a.fandom.com/wiki/SSH-68_Helmet",
+      "category": "Helmets"
+    },
+    {
+      "name": "Tanker Helmet",
+      "url": "https://project-delta-a.fandom.com/wiki/Tanker_Helmet",
+      "category": "Helmets"
+    },
+    {
+      "name": "6B27 Aramid Helmet",
+      "url": "https://project-delta-a.fandom.com/wiki/6B27_Aramid_Helmet",
+      "category": "Helmets"
+    },
+    {
+      "name": "UNO helmet",
+      "url": "https://project-delta-a.fandom.com/wiki/UNO_Helmet",
+      "category": "Helmets"
+    },
+    {
+      "name": "TOR-S Helmet",
+      "url": "https://project-delta-a.fandom.com/wiki/TOR-S_Helmet",
+      "category": "Helmets"
+    },
+    {
+      "name": "6B47 Helmet \"RATNIK\"",
+      "url": "https://project-delta-a.fandom.com/wiki/6B47_Helmet_%22RATNIK%22",
+      "category": "Helmets"
+    },
+    {
+      "name": "ZSh-1-2M Helmet",
+      "url": "https://project-delta-a.fandom.com/wiki/ZSh-1-2M_Helmet",
+      "category": "Helmets"
+    },
+    {
+      "name": "Fast MT Helmet",
+      "url": "https://project-delta-a.fandom.com/wiki/Fast_MT_Helmet",
+      "category": "Helmets"
+    },
+    {
+      "name": "Crown",
+      "url": "https://project-delta-a.fandom.com/wiki/Crown",
+      "category": "Helmets"
+    },
+    {
+      "name": "Altyn Helmet",
+      "url": "https://project-delta-a.fandom.com/wiki/Altyn_Helmet",
+      "category": "Helmets"
+    }
+  ],
+  "visors": [
+    {
+      "name": "Motorcycle Helmet Visor",
+      "url": "https://project-delta-a.fandom.com/wiki/Motorcycle_Helmet_Visor",
+      "category": "Visors"
+    },
+    {
+      "name": "ZSh-1-2M Visor",
+      "url": "https://project-delta-a.fandom.com/wiki/ZSh-1-2M_Visor",
+      "category": "Visors"
+    },
+    {
+      "name": "Night Vision Goggles 9",
+      "url": "https://project-delta-a.fandom.com/wiki/Night_Vision_Goggles_9",
+      "category": "Visors"
+    },
+    {
+      "name": "Low Cut Visor",
+      "url": "https://project-delta-a.fandom.com/wiki/Low_Cut_Visor",
+      "category": "Visors"
+    },
+    {
+      "name": "Spartan Tech Titan Shield",
+      "url": "https://project-delta-a.fandom.com/wiki/Spartan_Tech_Titan_Shield",
+      "category": "Visors"
+    },
+    {
+      "name": "Fast MT Visor",
+      "url": "https://project-delta-a.fandom.com/wiki/Fast_MT_Visor",
+      "category": "Visors"
+    },
+    {
+      "name": "Quad Night Vision Goggles",
+      "url": "https://project-delta-a.fandom.com/wiki/Quad_Night_Vision_Goggles",
+      "category": "Visors"
+    },
+    {
+      "name": "Altyn Visor",
+      "url": "https://project-delta-a.fandom.com/wiki/Altyn_Visor",
+      "category": "Visors"
+    },
+    {
+      "name": "Maska Visor",
+      "url": "https://project-delta-a.fandom.com/wiki/Maska_Visor",
+      "category": "Visors"
+    }
+  ],
+  "chestRigs": [
+    {
+      "name": "Bandolier",
+      "url": "https://project-delta-a.fandom.com/wiki/Bandolier",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "Smersh \"Recon\"",
+      "url": "https://project-delta-a.fandom.com/wiki/Smersh_%22Recon%22",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "6B2",
+      "url": "https://project-delta-a.fandom.com/wiki/6B2",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "Uno Vest",
+      "url": "https://project-delta-a.fandom.com/wiki/UNO_Vest",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "6B23",
+      "url": "https://project-delta-a.fandom.com/wiki/6B23",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "Concealed Vest",
+      "url": "https://project-delta-a.fandom.com/wiki/Concealed_Vest",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "Kora Kulon",
+      "url": "https://project-delta-a.fandom.com/wiki/Kora_Kulon",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "6B5",
+      "url": "https://project-delta-a.fandom.com/wiki/6B5",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "JPC \"Rush\"",
+      "url": "https://project-delta-a.fandom.com/wiki/JPC_%22Rush%22",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "Scav King’s Chestplate",
+      "url": "https://project-delta-a.fandom.com/wiki/Scav_King%E2%80%99s_Chestplate",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "6B45 \"RATNIK\"",
+      "url": "https://project-delta-a.fandom.com/wiki/6B45_%22RATNIK%22",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "Improved Outer Tactical Vest",
+      "url": "https://project-delta-a.fandom.com/wiki/Improved_Outer_Tactical_Vest",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "HSPV",
+      "url": "https://project-delta-a.fandom.com/wiki/HSPV",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "Dozer's Improvised Juggernaut Suit",
+      "url": "https://project-delta-a.fandom.com/wiki/Dozer%27s_Improvised_Juggernaut_Suit",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "repair kit",
+      "url": "https://project-delta-a.fandom.com/wiki/Repair_Kit",
+      "category": "Chest Rigs"
+    },
+    {
+      "name": "Level 4 Plate",
+      "url": "https://project-delta-a.fandom.com/wiki/Lvl_4_Plate",
+      "category": "Chest Rigs"
+    }
+  ],
+  "legArmor": [
+    {
+      "name": "Knee Pads",
+      "url": "https://project-delta-a.fandom.com/wiki/Knee_Pads",
+      "category": "Leg Armor"
+    },
+    {
+      "name": "Improved Outer Lower Armor",
+      "url": "https://project-delta-a.fandom.com/wiki/Improved_Outer_Lower_Armor",
+      "category": "Leg Armor"
+    }
+  ],
+  "backpacks": [
+    {
+      "name": "One-Strap Backpack Lynx 10L",
+      "url": "https://project-delta-a.fandom.com/wiki/One-Strap_Backpack_Lynx_10L",
+      "category": "Backpacks"
+    },
+    {
+      "name": "Wasteland Backpack 30L",
+      "url": "https://project-delta-a.fandom.com/wiki/Wasteland_Backpack",
+      "category": "Backpacks"
+    },
+    {
+      "name": "Special Operation Backpack 30L",
+      "url": "https://project-delta-a.fandom.com/wiki/Special_Operation_Backpack_30L",
+      "category": "Backpacks"
+    },
+    {
+      "name": "Tortilla Backpack 45L",
+      "url": "https://project-delta-a.fandom.com/wiki/Tortilla_Backpack_45L",
+      "category": "Backpacks"
+    },
+    {
+      "name": "Raid Backpack Attak-5 60L",
+      "url": "https://project-delta-a.fandom.com/wiki/Raid_Backpack_Attak-5_60L",
+      "category": "Backpacks"
+    }
+  ],
+  "clothes": [
+    {
+      "name": "Wasteland Shirt",
+      "url": "https://project-delta-a.fandom.com/wiki/Wasteland_Shirt",
+      "category": "Clothes"
+    },
+    {
+      "name": "Camo Shirt",
+      "url": "https://project-delta-a.fandom.com/wiki/Camo_Shirt",
+      "category": "Clothes"
+    },
+    {
+      "name": "Suit Shirt",
+      "url": "https://project-delta-a.fandom.com/wiki/Suit_Shirt",
+      "category": "Clothes"
+    },
+    {
+      "name": "Ghillie Suit Shirt",
+      "url": "https://project-delta-a.fandom.com/wiki/Ghillie_Suit_Shirt",
+      "category": "Clothes"
+    },
+    {
+      "name": "Gorka Shirt",
+      "url": "https://project-delta-a.fandom.com/wiki/Gorka_Shirt",
+      "category": "Clothes"
+    },
+    {
+      "name": "Wasteland Pants",
+      "url": "https://project-delta-a.fandom.com/wiki/Wasteland_Pants",
+      "category": "Clothes"
+    },
+    {
+      "name": "Camo Pants",
+      "url": "https://project-delta-a.fandom.com/wiki/Camo_Pants",
+      "category": "Clothes"
+    },
+    {
+      "name": "Suit Pants",
+      "url": "https://project-delta-a.fandom.com/wiki/Suit_Pants",
+      "category": "Clothes"
+    },
+    {
+      "name": "Ghillie Suit Pants",
+      "url": "https://project-delta-a.fandom.com/wiki/Ghillie_Suit_Pants",
+      "category": "Clothes"
+    },
+    {
+      "name": "Gorka Pants",
+      "url": "https://project-delta-a.fandom.com/wiki/Gorka_Pants",
+      "category": "Clothes"
+    }
+  ],
+  "masks": [
+    {
+      "name": "Ghillie Suit Hood",
+      "url": "https://project-delta-a.fandom.com/wiki/Ghillie_Suit_Hood",
+      "category": "Masks"
+    },
+    {
+      "name": "Balaclava \"Ninja\"",
+      "url": "https://project-delta-a.fandom.com/wiki/Balaclava_%22Ninja%22",
+      "category": "Masks"
+    },
+    {
+      "name": "GP-5 Gas Mask",
+      "url": "https://project-delta-a.fandom.com/wiki/GP-5_Gas_Mask",
+      "category": "Masks"
+    },
+    {
+      "name": "GP-5 Gas Mask Filter",
+      "url": "https://project-delta-a.fandom.com/wiki/GP-5_Gas_Mask_Filter",
+      "category": "Masks"
+    }
+  ],
+  "gloves": [
+    {
+      "name": "Hand Wraps",
+      "url": "https://project-delta-a.fandom.com/wiki/Hand_Wraps",
+      "category": "Gloves"
+    },
+    {
+      "name": "Combat Gloves",
+      "url": "https://project-delta-a.fandom.com/wiki/Combat_Gloves",
+      "category": "Gloves"
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Lighter",
+      "url": "https://project-delta-a.fandom.com/wiki/Lighter",
+      "category": "Equipment"
+    },
+    {
+      "name": "Estonian Border Map",
+      "url": "https://project-delta-a.fandom.com/wiki/Map",
+      "category": "Equipment"
+    },
+    {
+      "name": "Compass \"Pathfinder\"",
+      "url": "https://project-delta-a.fandom.com/wiki/Compass",
+      "category": "Equipment"
+    },
+    {
+      "name": "Defense Advanced GPS Receiver",
+      "url": "https://project-delta-a.fandom.com/wiki/DAGR",
+      "category": "Equipment"
+    },
+    {
+      "name": "Cassette Player",
+      "url": "https://project-delta-a.fandom.com/wiki/Cassette_Player",
+      "category": "Equipment"
+    },
+    {
+      "name": "Keychain",
+      "url": "https://project-delta-a.fandom.com/wiki/Keychain",
+      "category": "Equipment"
+    }
+  ],
+  "ammunition": [
+    {
+      "name": "Armor Piercing",
+      "url": "https://project-delta-a.fandom.com/wiki/9x18_Armor_Piercing_Bullet",
+      "category": "Ammunition"
+    },
+    {
+      "name": "TFZ CQB",
+      "url": "https://project-delta-a.fandom.com/wiki/9x18_TFZ_CQB_Bullet",
+      "category": "Ammunition"
+    },
+    {
+      "name": "Armor Piercing",
+      "url": "https://project-delta-a.fandom.com/wiki/9x19_Armor_Piercing_Bullet",
+      "category": "Ammunition"
+    },
+    {
+      "name": "Armor Piercing",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x25_Armor_Piercing_Bullet",
+      "category": "Ammunition"
+    },
+    {
+      "name": "Armor Piercing",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x39_Armor_Piercing_Bullet",
+      "category": "Ammunition"
+    },
+    {
+      "name": "Rimmed Armor Piercing",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x54_Rimmed_Armor_Piercing_Bullet",
+      "category": "Ammunition"
+    },
+    {
+      "name": "Armor Piercing",
+      "url": "https://project-delta-a.fandom.com/wiki/7.62x51_AP",
+      "category": "Ammunition"
+    },
+    {
+      "name": "Armor Piercing",
+      "url": "https://project-delta-a.fandom.com/wiki/5.56x45_Armor_Piercing_Bullet",
+      "category": "Ammunition"
+    },
+    {
+      "name": "TFZ CQB",
+      "url": "https://project-delta-a.fandom.com/wiki/9x39_TFZ_CQB_Bullet",
+      "category": "Ammunition"
+    },
+    {
+      "name": "Armor Piercing",
+      "url": "https://project-delta-a.fandom.com/wiki/.338_Lapua_Magnum_Armor_Piercing_Bullet",
+      "category": "Ammunition"
+    },
+    {
+      "name": "Slug",
+      "url": "https://project-delta-a.fandom.com/wiki/12ga_Slug",
+      "category": "Ammunition"
+    },
+    {
+      "name": "Flechette",
+      "url": "https://project-delta-a.fandom.com/wiki/12ga_Flechette",
+      "category": "Ammunition"
+    },
+    {
+      "name": "AP-20",
+      "url": "https://project-delta-a.fandom.com/wiki/12ga_AP-20",
+      "category": "Ammunition"
+    }
+  ],
+  "deployables": [
+    {
+      "name": "PMN2",
+      "url": "https://project-delta-a.fandom.com/wiki/PMN2",
+      "category": "Deployables"
+    },
+    {
+      "name": "MON-50",
+      "url": "https://project-delta-a.fandom.com/wiki/MON-50",
+      "category": "Deployables"
+    },
+    {
+      "name": "F1 Trap",
+      "url": "https://project-delta-a.fandom.com/wiki/F1_Trap",
+      "category": "Deployables"
+    },
+    {
+      "name": "Sandbag",
+      "url": "https://project-delta-a.fandom.com/wiki/Sandbag",
+      "category": "Deployables"
+    },
+    {
+      "name": "Barricade",
+      "url": "https://project-delta-a.fandom.com/wiki/Barricade",
+      "category": "Deployables"
+    },
+    {
+      "name": "Radio",
+      "url": "https://project-delta-a.fandom.com/wiki/Radio",
+      "category": "Deployables"
+    },
+    {
+      "name": "City-13",
+      "url": "https://project-delta-a.fandom.com/wiki/City-13",
+      "category": "Deployables"
+    },
+    {
+      "name": "Heli crash",
+      "url": "https://project-delta-a.fandom.com/wiki/Helicopter_Crash",
+      "category": "Deployables"
+    },
+    {
+      "name": "Shipwreck",
+      "url": "https://project-delta-a.fandom.com/wiki/Shipwreck",
+      "category": "Deployables"
+    },
+    {
+      "name": "Land bridge",
+      "url": "https://project-delta-a.fandom.com/wiki/Land_bridge",
+      "category": "Deployables"
+    }
+  ],
+  "consumables": [
+    {
+      "name": "Max Energy",
+      "url": "https://project-delta-a.fandom.com/wiki/Max_Energy",
+      "category": "Consumables"
+    },
+    {
+      "name": "Benny's Beans",
+      "url": "https://project-delta-a.fandom.com/wiki/Benny%27s_Beans",
+      "category": "Consumables"
+    },
+    {
+      "name": "PEIPS Water Bottle",
+      "url": "https://project-delta-a.fandom.com/wiki/PEIPS_Water_Bottle",
+      "category": "Consumables"
+    },
+    {
+      "name": "Bloxy Cola",
+      "url": "https://project-delta-a.fandom.com/wiki/Bloxy_Cola",
+      "category": "Consumables"
+    },
+    {
+      "name": "Comrade CatFrog Soda",
+      "url": "https://project-delta-a.fandom.com/wiki/Comrade_CatFrog_Soda",
+      "category": "Consumables"
+    },
+    {
+      "name": "Kev Cola",
+      "url": "https://project-delta-a.fandom.com/wiki/Kev_Cola",
+      "category": "Consumables"
+    },
+    {
+      "name": "Condensed Milk",
+      "url": "https://project-delta-a.fandom.com/wiki/Condensed_Milk",
+      "category": "Consumables"
+    },
+    {
+      "name": "AA-2 \"Survival\"",
+      "url": "https://project-delta-a.fandom.com/wiki/AA-2_%22Survival%22",
+      "category": "Consumables"
+    },
+    {
+      "name": "IFAK",
+      "url": "https://project-delta-a.fandom.com/wiki/Infantry_First_Aid_Kit",
+      "category": "Consumables"
+    },
+    {
+      "name": "AI-2",
+      "url": "https://project-delta-a.fandom.com/wiki/AI-2",
+      "category": "Consumables"
+    },
+    {
+      "name": "AI-4",
+      "url": "https://project-delta-a.fandom.com/wiki/AI-4",
+      "category": "Consumables"
+    },
+    {
+      "name": "Wound Dressing",
+      "url": "https://project-delta-a.fandom.com/wiki/Wound_Dressing",
+      "category": "Consumables"
+    },
+    {
+      "name": "Bandage",
+      "url": "https://project-delta-a.fandom.com/wiki/Bandage",
+      "category": "Consumables"
+    },
+    {
+      "name": "Rags",
+      "url": "https://project-delta-a.fandom.com/wiki/Rags",
+      "category": "Consumables"
+    },
+    {
+      "name": "Serum-X Stim Red",
+      "url": "https://project-delta-a.fandom.com/wiki/Serum-X_Stim_Red",
+      "category": "Consumables"
+    },
+    {
+      "name": "Serum-X Stim Green",
+      "url": "https://project-delta-a.fandom.com/wiki/Serum-X_Stim_Green",
+      "category": "Consumables"
+    },
+    {
+      "name": "Serum-X Stim Yellow",
+      "url": "https://project-delta-a.fandom.com/wiki/Serum-X_Stim_Yellow",
+      "category": "Consumables"
+    }
+  ],
+  "keys": [],
+  "junk": [
+    {
+      "name": "Duct Tape",
+      "url": "https://project-delta-a.fandom.com/wiki/Duct_Tape",
+      "category": "Junk"
+    },
+    {
+      "name": "Metal Bolts",
+      "url": "https://project-delta-a.fandom.com/wiki/Metal_Bolts",
+      "category": "Junk"
+    },
+    {
+      "name": "Metal Nuts",
+      "url": "https://project-delta-a.fandom.com/wiki/Metal_Nuts",
+      "category": "Junk"
+    },
+    {
+      "name": "Metal Nails",
+      "url": "https://project-delta-a.fandom.com/wiki/Metal_Nails",
+      "category": "Junk"
+    },
+    {
+      "name": "PH2 Screwdriver",
+      "url": "https://project-delta-a.fandom.com/wiki/PH2_Screwdriver",
+      "category": "Junk"
+    },
+    {
+      "name": "Flathead Screwdriver",
+      "url": "https://project-delta-a.fandom.com/wiki/Flathead_Screwdriver",
+      "category": "Junk"
+    },
+    {
+      "name": "Wrench",
+      "url": "https://project-delta-a.fandom.com/wiki/Wrench",
+      "category": "Junk"
+    },
+    {
+      "name": "Copper Coil",
+      "url": "https://project-delta-a.fandom.com/wiki/Copper_Coil",
+      "category": "Junk"
+    },
+    {
+      "name": "AA Battery",
+      "url": "https://project-delta-a.fandom.com/wiki/AA_Battery",
+      "category": "Junk"
+    },
+    {
+      "name": "Super Glue",
+      "url": "https://project-delta-a.fandom.com/wiki/Super_Glue",
+      "category": "Junk"
+    },
+    {
+      "name": "Hammer",
+      "url": "https://project-delta-a.fandom.com/wiki/Hammer",
+      "category": "Junk"
+    },
+    {
+      "name": "Cotton",
+      "url": "https://project-delta-a.fandom.com/wiki/Cotton",
+      "category": "Junk"
+    },
+    {
+      "name": "Ripstop",
+      "url": "https://project-delta-a.fandom.com/wiki/Ripstop",
+      "category": "Junk"
+    },
+    {
+      "name": "Aramid",
+      "url": "https://project-delta-a.fandom.com/wiki/Aramid",
+      "category": "Junk"
+    },
+    {
+      "name": "Linen",
+      "url": "https://project-delta-a.fandom.com/wiki/Linen",
+      "category": "Junk"
+    },
+    {
+      "name": "Motor Oil",
+      "url": "https://project-delta-a.fandom.com/wiki/Motor_Oil",
+      "category": "Junk"
+    },
+    {
+      "name": "Fuze",
+      "url": "https://project-delta-a.fandom.com/wiki/Fuze",
+      "category": "Junk"
+    },
+    {
+      "name": "Gunpowder",
+      "url": "https://project-delta-a.fandom.com/wiki/Gunpowder",
+      "category": "Junk"
+    },
+    {
+      "name": "Steel Pipe",
+      "url": "https://project-delta-a.fandom.com/wiki/Steel_Pipe",
+      "category": "Junk"
+    },
+    {
+      "name": "Metal",
+      "url": "https://project-delta-a.fandom.com/wiki/Metal",
+      "category": "Junk"
+    },
+    {
+      "name": "Wooden Planks",
+      "url": "https://project-delta-a.fandom.com/wiki/Wooden_Planks",
+      "category": "Junk"
+    },
+    {
+      "name": "Weapon Part",
+      "url": "https://project-delta-a.fandom.com/wiki/Weapon_Part",
+      "category": "Junk"
+    },
+    {
+      "name": "Rags",
+      "url": "https://project-delta-a.fandom.com/wiki/Rags",
+      "category": "Junk"
+    },
+    {
+      "name": "Statue of Solter",
+      "url": "https://project-delta-a.fandom.com/wiki/Statue_of_Solter",
+      "category": "Junk"
+    },
+    {
+      "name": "50g Gold",
+      "url": "https://project-delta-a.fandom.com/wiki/50g_Gold",
+      "category": "Junk"
+    },
+    {
+      "name": "Gold Watch",
+      "url": "https://project-delta-a.fandom.com/wiki/Gold_Watch",
+      "category": "Junk"
+    },
+    {
+      "name": "Gold Tix",
+      "url": "https://project-delta-a.fandom.com/wiki/Gold_Tix",
+      "category": "Junk"
+    },
+    {
+      "name": "GPU",
+      "url": "https://project-delta-a.fandom.com/wiki/GPU",
+      "category": "Junk"
+    },
+    {
+      "name": "SSD",
+      "url": "https://project-delta-a.fandom.com/wiki/SSD",
+      "category": "Junk"
+    },
+    {
+      "name": "RAM",
+      "url": "https://project-delta-a.fandom.com/wiki/RAM",
+      "category": "Junk"
+    },
+    {
+      "name": "CPU",
+      "url": "https://project-delta-a.fandom.com/wiki/CPU",
+      "category": "Junk"
+    },
+    {
+      "name": "C. Fan",
+      "url": "https://project-delta-a.fandom.com/wiki/C._Fan",
+      "category": "Junk"
+    },
+    {
+      "name": "PSU",
+      "url": "https://project-delta-a.fandom.com/wiki/PSU",
+      "category": "Junk"
+    }
+  ]
+}

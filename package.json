@@ -18,7 +18,10 @@
     "db:reset": "prisma migrate reset",
     "db:fix": "prisma migrate resolve --rolled-back 20251105091513_prd_item_listing_flow && prisma db push --accept-data-loss",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "node scripts/studio.js"
+    "db:studio": "node scripts/studio.js",
+    "fetch:wiki-icon": "tsx scripts/fetch-wiki-icon-puppeteer.ts",
+    "fetch:wiki-links": "tsx scripts/fetch-wiki-item-links.ts",
+    "fetch:wiki-details": "tsx scripts/fetch-wiki-details.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -38,11 +41,13 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/puppeteer": "^7.0.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.1",
+    "puppeteer": "^24.29.1",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",
     "typescript": "^5"
