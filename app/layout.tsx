@@ -28,11 +28,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full flex flex-col`}
       >
         <Providers>
           <Navbar />
-          <main className="min-h-screen pb-32">
+          <main className="flex-1 overflow-auto">
             {children}
           </main>
           <ChatBar />

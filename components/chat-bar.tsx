@@ -10,6 +10,7 @@ import { useOrder } from '@/lib/contexts/order-context';
 import React from 'react';
 import { cn, getDisplayName } from '@/lib/utils';
 import { Package, CheckCircle, Upload, AlertCircle } from 'lucide-react';
+import { CancelOrderDialog } from '@/components/cancel-order-dialog';
 
 export function ChatBar() {
   const pathname = usePathname();
@@ -22,6 +23,9 @@ export function ChatBar() {
   const [offset, setOffset] = useState<Record<string, number>>({});
   const [loadingMore, setLoadingMore] = useState<Record<string, boolean>>({});
   const [shouldScrollToBottom, setShouldScrollToBottom] = useState<Record<string, boolean>>({});
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
   const messageEndRefs = useRef<Record<string, HTMLDivElement>>({});
   const messageContainerRefs = useRef<Record<string, HTMLDivElement>>({});
   const messageTopRefs = useRef<Record<string, HTMLDivElement>>({});
@@ -306,13 +310,33 @@ export function ChatBar() {
     }
   }, [expandedChat, user, chats, orders, getOrderByChat, updateOrderStatus]);
 
+  const handleCancelOrder = (orderId: string) => {
+    setCancelOrderId(orderId);
+    setCancelDialogOpen(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!cancelOrderId) return;
+    setIsCancelling(true);
+    try {
+      await updateOrderStatus(cancelOrderId, 'CANCELLED');
+      setCancelDialogOpen(false);
+      setCancelOrderId(null);
+    } catch (error) {
+      console.error('Failed to cancel order:', error);
+      alert('Failed to cancel order. Please try again.');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   // Early return after all hooks
   // Hide chat bar on inbox page
   if (pathname === '/inbox') return null;
   if (!user || chats.length === 0) return null;
 
   return (
-    <div className="fixed bottom-0 right-0 z-50 flex items-end gap-2 p-4 max-w-full overflow-x-auto">
+    <div className="fixed bottom-0 right-0 z-50 flex items-end gap-2 px-6 max-w-full overflow-x-auto">
       {chats.map((chat) => {
         const otherUserId = chat.participants.find(id => id !== user.id);
         if (!otherUserId) return null;
@@ -330,7 +354,7 @@ export function ChatBar() {
             className={cn(
               "bg-card border border-border rounded-t-xl shadow-2xl flex flex-col",
               "transition-all duration-300 flex-shrink-0",
-              isExpanded ? "w-80 h-96 max-h-[80vh]" : "w-64 h-12"
+              isExpanded ? "w-96 h-124 max-h-[80vh]" : "w-64 h-14"
             )}
           >
             {/* Chat Header */}
@@ -360,14 +384,12 @@ export function ChatBar() {
                     unoptimized
                   />
                 </div>
-                {isExpanded && (
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-sm truncate">{getDisplayName(otherUser)}</p>
                     <p className="text-xs text-muted-foreground truncate">
                       {chat.lastMessage || 'New chat'}
                     </p>
                   </div>
-                )}
               </div>
               <div className="flex items-center gap-1">
                 <button
@@ -549,17 +571,29 @@ export function ChatBar() {
                             <Upload className="h-4 w-4" />
                             Mark as Sent
                           </button>
+                          <button
+                            onClick={() => handleCancelOrder(order.id)}
+                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                          >
+                            Cancel Order
+                          </button>
                         </div>
                       );
                     } else {
                       return (
-                        <div className="p-3 border-t border-border bg-muted/30">
+                        <div className="p-3 border-t border-border bg-muted/30 space-y-2">
                           <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
                             <Package className="h-4 w-4 text-blue-600" />
                             <span className="text-sm font-semibold text-blue-700">
                               Order Reserved - Waiting for seller to mark as sent...
                             </span>
                           </div>
+                          <button
+                            onClick={() => handleCancelOrder(order.id)}
+                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                          >
+                            Cancel Order
+                          </button>
                         </div>
                       );
                     }
@@ -589,17 +623,29 @@ export function ChatBar() {
                             <Upload className="h-4 w-4" />
                             Mark as Sent
                           </button>
+                          <button
+                            onClick={() => handleCancelOrder(order.id)}
+                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                          >
+                            Cancel Order
+                          </button>
                         </div>
                       );
                     } else {
                       return (
-                        <div className="p-3 border-t border-border bg-muted/30">
+                        <div className="p-3 border-t border-border bg-muted/30 space-y-2">
                           <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
                             <Package className="h-4 w-4 text-blue-600" />
                             <span className="text-sm font-semibold text-blue-700">
                               Waiting for seller to mark as sent...
                             </span>
                           </div>
+                          <button
+                            onClick={() => handleCancelOrder(order.id)}
+                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                          >
+                            Cancel Order
+                          </button>
                         </div>
                       );
                     }
@@ -641,17 +687,29 @@ export function ChatBar() {
                             <CheckCircle className="h-4 w-4" />
                             Confirm Received
                           </button>
+                          <button
+                            onClick={() => handleCancelOrder(order.id)}
+                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                          >
+                            Cancel Order
+                          </button>
                         </div>
                       );
                     } else {
                       return (
-                        <div className="p-3 border-t border-border bg-muted/30">
+                        <div className="p-3 border-t border-border bg-muted/30 space-y-2">
                           <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/20 border border-green-500/50">
                             <Package className="h-4 w-4 text-green-600" />
                             <span className="text-sm font-semibold text-green-700">
                               Waiting for buyer to confirm receipt...
                             </span>
                           </div>
+                          <button
+                            onClick={() => handleCancelOrder(order.id)}
+                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                          >
+                            Cancel Order
+                          </button>
                         </div>
                       );
                     }
@@ -741,6 +799,15 @@ export function ChatBar() {
           </div>
         );
       })}
+      <CancelOrderDialog
+        isOpen={cancelDialogOpen}
+        onClose={() => {
+          setCancelDialogOpen(false);
+          setCancelOrderId(null);
+        }}
+        onConfirm={handleConfirmCancel}
+        isLoading={isCancelling}
+      />
     </div>
   );
 }

@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { Search, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type ItemRow = {
 	id: string;
@@ -21,6 +23,8 @@ export default function AdminItemsPage() {
 	const [loading, setLoading] = useState(true);
 	const [forbidden, setForbidden] = useState(false);
 	const [items, setItems] = useState<ItemRow[]>([]);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [selectedType, setSelectedType] = useState<'WEAPON' | 'MEDICINE' | 'ATTACHMENT' | null>(null);
 	const [isCreating, setIsCreating] = useState(false);
 	const [createName, setCreateName] = useState('');
 	const [createDescription, setCreateDescription] = useState('');
@@ -66,6 +70,32 @@ export default function AdminItemsPage() {
 		};
 		init();
 	}, []);
+
+	const filteredItems = useMemo(() => {
+		let filtered = items;
+
+		// Filter by type
+		if (selectedType) {
+			filtered = filtered.filter((item) => item.type === selectedType);
+		}
+
+		// Filter by search query
+		if (searchQuery.trim()) {
+			const query = searchQuery.toLowerCase();
+			filtered = filtered.filter((item) =>
+				(item.name || '').toLowerCase().includes(query) ||
+				(item.description || '').toLowerCase().includes(query)
+			);
+		}
+
+		return filtered;
+	}, [items, searchQuery, selectedType]);
+
+	const itemTypes: { value: 'WEAPON' | 'MEDICINE' | 'ATTACHMENT'; label: string }[] = [
+		{ value: 'WEAPON', label: 'Weapon' },
+		{ value: 'MEDICINE', label: 'Medicine' },
+		{ value: 'ATTACHMENT', label: 'Attachment' },
+	];
 
 	if (loading) return <div className="container mx-auto px-4 py-8">Loading...</div>;
 	if (forbidden)
@@ -667,6 +697,64 @@ export default function AdminItemsPage() {
 						<Link href="/admin" className="text-sm text-primary underline">Back to Admin</Link>
 					</div>
 				</div>
+
+				<div className="mb-6 space-y-4">
+					<div className="relative">
+						<Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+						<input
+							type="text"
+							placeholder="Search items by name or description..."
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							className={cn(
+								"w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-background",
+								"focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
+								"transition-all"
+							)}
+						/>
+					</div>
+
+					<div className="flex flex-wrap items-center gap-2">
+						<span className="text-sm font-medium text-muted-foreground">Filter by type:</span>
+						<button
+							onClick={() => setSelectedType(null)}
+							className={cn(
+								"px-4 py-2 rounded-lg text-sm font-medium transition-all",
+								"border-2",
+								selectedType === null
+									? "bg-primary text-primary-foreground border-primary"
+									: "bg-background text-foreground border-border hover:border-primary/50"
+							)}
+						>
+							All
+						</button>
+						{itemTypes.map((type) => (
+							<button
+								key={type.value}
+								onClick={() => setSelectedType(type.value)}
+								className={cn(
+									"px-4 py-2 rounded-lg text-sm font-medium transition-all",
+									"border-2",
+									selectedType === type.value
+										? "bg-primary text-primary-foreground border-primary"
+										: "bg-background text-foreground border-border hover:border-primary/50"
+								)}
+							>
+								{type.label}
+							</button>
+						))}
+						{selectedType && (
+							<button
+								onClick={() => setSelectedType(null)}
+								className="ml-auto px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+							>
+								<X className="h-4 w-4" />
+								Clear filter
+							</button>
+						)}
+					</div>
+				</div>
+
 			<div className="rounded-2xl border border-border overflow-hidden">
 				<table className="w-full text-sm">
 					<thead className="bg-muted">
@@ -684,7 +772,16 @@ export default function AdminItemsPage() {
 						</tr>
 					</thead>
 					<tbody>
-						{items.map((it) => (
+						{filteredItems.length === 0 ? (
+							<tr>
+								<td colSpan={10} className="p-8 text-center text-muted-foreground">
+									{searchQuery || selectedType
+										? `No items found${searchQuery ? ` matching "${searchQuery}"` : ''}${selectedType ? ` with type "${itemTypes.find(t => t.value === selectedType)?.label}"` : ''}`
+										: 'No items available'}
+								</td>
+							</tr>
+						) : (
+							filteredItems.map((it) => (
 							<tr key={it.id} className="border-t border-border hover:bg-muted/30">
 								<td className="p-3">
 									<img src={it.image} alt="thumb" className="w-12 h-12 object-cover rounded border" />
@@ -719,7 +816,8 @@ export default function AdminItemsPage() {
 									</div>
 								</td>
 							</tr>
-						))}
+							))
+						)}
 					</tbody>
 				</table>
 			</div>

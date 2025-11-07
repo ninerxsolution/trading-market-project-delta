@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { cn, getDisplayName } from '@/lib/utils';
 import { useOrder } from '@/lib/contexts/order-context';
 import { Package, CheckCircle, Upload, AlertCircle } from 'lucide-react';
+import { CancelOrderDialog } from '@/components/cancel-order-dialog';
 
 type Conversation = {
 	otherUser: { id: string; username: string; avatar: string; merchantName?: string | null };
@@ -25,6 +26,9 @@ export default function InboxPage() {
 	const [offset, setOffset] = useState(0);
 	const [loadingMore, setLoadingMore] = useState(false);
 	const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
+	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+	const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
+	const [isCancelling, setIsCancelling] = useState(false);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const messagesContainerRef = useRef<HTMLDivElement>(null);
 	const messagesTopRef = useRef<HTMLDivElement>(null);
@@ -287,6 +291,26 @@ export default function InboxPage() {
 
 	const activeUser = useMemo(() => conversations.find(c => c.otherUser.id === active)?.otherUser, [conversations, active]);
 
+	const handleCancelOrder = (orderId: string) => {
+		setCancelOrderId(orderId);
+		setCancelDialogOpen(true);
+	};
+
+	const handleConfirmCancel = async () => {
+		if (!cancelOrderId) return;
+		setIsCancelling(true);
+		try {
+			await updateOrderStatus(cancelOrderId, 'CANCELLED');
+			setCancelDialogOpen(false);
+			setCancelOrderId(null);
+		} catch (error) {
+			console.error('Failed to cancel order:', error);
+			alert('Failed to cancel order. Please try again.');
+		} finally {
+			setIsCancelling(false);
+		}
+	};
+
 	const send = async () => {
 		if (!active || !input.trim()) return;
 		const content = input.trim();
@@ -419,17 +443,29 @@ export default function InboxPage() {
                                             <Upload className="h-4 w-4" />
                                             Mark as Sent
                                         </button>
+                                        <button
+                                            onClick={() => handleCancelOrder(order.id)}
+                                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                                        >
+                                            Cancel Order
+                                        </button>
                                     </div>
                                 );
                             } else {
                                 return (
-                                    <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
+                                    <div className="p-3 border-t border-border bg-muted/30 space-y-2 flex-shrink-0">
                                         <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
                                             <Package className="h-4 w-4 text-blue-600" />
                                             <span className="text-sm font-semibold text-blue-700">
                                                 Order Reserved - Waiting for seller to mark as sent...
                                             </span>
                                         </div>
+                                        <button
+                                            onClick={() => handleCancelOrder(order.id)}
+                                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                                        >
+                                            Cancel Order
+                                        </button>
                                     </div>
                                 );
                             }
@@ -460,17 +496,29 @@ export default function InboxPage() {
                                             <Upload className="h-4 w-4" />
                                             Mark as Sent
                                         </button>
+                                        <button
+                                            onClick={() => handleCancelOrder(order.id)}
+                                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                                        >
+                                            Cancel Order
+                                        </button>
                                     </div>
                                 );
                             } else {
                                 return (
-                                    <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
+                                    <div className="p-3 border-t border-border bg-muted/30 space-y-2 flex-shrink-0">
                                         <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/20 border border-blue-500/50">
                                             <Package className="h-4 w-4 text-blue-600" />
                                             <span className="text-sm font-semibold text-blue-700">
                                                 Waiting for seller to mark as sent...
                                             </span>
                                         </div>
+                                        <button
+                                            onClick={() => handleCancelOrder(order.id)}
+                                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                                        >
+                                            Cancel Order
+                                        </button>
                                     </div>
                                 );
                             }
@@ -513,17 +561,29 @@ export default function InboxPage() {
                                             <CheckCircle className="h-4 w-4" />
                                             Confirm Received
                                         </button>
+                                        <button
+                                            onClick={() => handleCancelOrder(order.id)}
+                                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                                        >
+                                            Cancel Order
+                                        </button>
                                     </div>
                                 );
                             } else {
                                 return (
-                                    <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
+                                    <div className="p-3 border-t border-border bg-muted/30 space-y-2 flex-shrink-0">
                                         <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/20 border border-green-500/50">
                                             <Package className="h-4 w-4 text-green-600" />
                                             <span className="text-sm font-semibold text-green-700">
                                                 Waiting for buyer to confirm receipt...
                                             </span>
                                         </div>
+                                        <button
+                                            onClick={() => handleCancelOrder(order.id)}
+                                            className="w-full px-4 py-2 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors"
+                                        >
+                                            Cancel Order
+                                        </button>
                                     </div>
                                 );
                             }
@@ -592,6 +652,15 @@ export default function InboxPage() {
 					</div>
 				</div>
 			</div>
+			<CancelOrderDialog
+				isOpen={cancelDialogOpen}
+				onClose={() => {
+					setCancelDialogOpen(false);
+					setCancelOrderId(null);
+				}}
+				onConfirm={handleConfirmCancel}
+				isLoading={isCancelling}
+			/>
 		</div>
 	);
 }

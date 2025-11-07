@@ -226,6 +226,30 @@ export async function PATCH(
         },
       });
       const dto = { ...updated, proofImages: updated.proofImages ? JSON.parse(updated.proofImages) : [] };
+      
+      // Send automatic message to chat when order is cancelled
+      if (nextStatus === 'CANCELLED') {
+        try {
+          const cancelledBy = actingRole === 'SELLER' ? 'seller' : 'buyer';
+          const message = await prisma.chatMessage.create({
+            data: {
+              senderId: requesterId,
+              receiverId: actingRole === 'SELLER' ? order.buyerId : order.sellerId,
+              message: `Order has been cancelled by ${cancelledBy}.`,
+              orderId: order.id,
+            },
+          });
+
+          // Broadcast to both participants
+          const payload = { type: 'message', message };
+          try { broadcastTo(order.buyerId, payload); } catch {}
+          try { broadcastTo(order.sellerId, payload); } catch {}
+        } catch (error) {
+          // Don't fail order update if message sending fails
+          console.error('Failed to send automatic message on order cancellation:', error);
+        }
+      }
+      
       return NextResponse.json({ success: true, order: dto });
     }
 
